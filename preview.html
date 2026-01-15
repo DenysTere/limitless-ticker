@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limitless Ticker Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-track {
+      animation: scroll var(--duration, 30s) linear infinite;
+    }
+    .ticker-track:hover {
+      animation-play-state: paused;
+    }
+    .glow-green { text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+    .glow-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+    .market-link:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    body.light .market-link:hover {
+      background: rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body class="bg-[#0A0A0A] min-h-screen">
+
+  <!-- Ticker at top -->
+  <div id="ticker-container" class="relative overflow-hidden border-b border-zinc-800 bg-[#0f0f0f]">
+    <!-- Loading State -->
+    <div id="ticker-loading" class="flex items-center justify-center py-6 text-zinc-400">
+      <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      Loading live markets...
+    </div>
+
+    <!-- Ticker Track -->
+    <div class="ticker-track hidden flex items-center py-4" id="ticker-track"></div>
+
+    <!-- Gradient overlays -->
+    <div id="fade-left" class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0f0f0f] to-transparent pointer-events-none"></div>
+    <div id="fade-right" class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0f0f0f] to-transparent pointer-events-none"></div>
+  </div>
+
+  <!-- Info text -->
+  <div class="flex items-center justify-center py-8 text-zinc-500">
+    <p>Hover to pause &bull; Click market to trade on <a href="https://limitless.exchange" class="text-white hover:underline">limitless.exchange</a></p>
+  </div>
+
+  <script>
+    // Parse URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const theme = params.get('theme') || 'dark';
+    const speed = parseInt(params.get('speed')) || 25;
+    const height = parseInt(params.get('height')) || 80;
+
+    // API Configuration
+    const API_BASE = '/api';
+
+    // Apply theme
+    const isLight = theme === 'light';
+    if (isLight) {
+      document.body.classList.remove('bg-[#0A0A0A]');
+      document.body.classList.add('bg-white', 'light');
+      document.getElementById('ticker-container').classList.remove('bg-[#0f0f0f]', 'border-zinc-800');
+      document.getElementById('ticker-container').classList.add('bg-white', 'border-zinc-300');
+      document.getElementById('fade-left').style.background = 'linear-gradient(to right, white, transparent)';
+      document.getElementById('fade-right').style.background = 'linear-gradient(to left, white, transparent)';
+    }
+
+    // Apply speed
+    document.getElementById('ticker-track').style.setProperty('--duration', speed + 's');
+
+    // Get emoji for market (same as main page)
+    function getEmoji(title) {
+      const t = title.toLowerCase();
+      if (t.includes('btc') || t.includes('bitcoin')) return '₿';
+      if (t.includes('eth')) return 'Ξ';
+      if (t.includes('sol')) return '◎';
+      if (t.includes('doge')) return '🐕';
+      if (t.includes('xrp')) return '💧';
+      if (t.includes('bnb')) return '💛';
+      if (t.includes('avax')) return '🔺';
+      if (t.includes('trump') || t.includes('biden') || t.includes('election')) return '🇺🇸';
+      if (t.includes('nfl') || t.includes('nba') || t.includes('super bowl')) return '🏆';
+      if (t.includes('ai') || t.includes('gpt')) return '🤖';
+      return '📊';
+    }
+
+    // Format price as percentage
+    function formatPrice(price) {
+      const p = parseFloat(price);
+      return p > 1 ? Math.round(p) : Math.round(p * 100);
+    }
+
+    // Seeded random for consistent "change" values
+    function seededRandom(seed) {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    }
+
+    // Render markets (same logic as main page)
+    function renderTicker(markets) {
+      const track = document.getElementById('ticker-track');
+      const loading = document.getElementById('ticker-loading');
+      const container = document.getElementById('ticker-container');
+
+      // Scale factor based on height
+      const scale = height / 80;
+      const emojiSize = Math.round(20 * scale);
+      const titleSize = Math.round(14 * scale);
+      const priceSize = Math.round(18 * scale);
+      const changeSize = Math.round(12 * scale);
+      const padding = Math.round(24 * scale);
+      const gap = Math.round(12 * scale);
+      const maxWidth = Math.round(200 * scale);
+
+      // Update container height
+      container.style.height = height + 'px';
+
+      const items = markets.slice(0, 12).map((m, index) => {
+        const title = m.title || 'Market';
+        const slug = m.slug || '';
+        const url = `https://limitless.exchange/markets/${slug}`;
+        const pct = formatPrice(m.prices?.[0] || 0.5);
+        const emoji = getEmoji(title);
+
+        // Use seeded random based on market slug for consistent changes
+        const seed = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const change = ((seededRandom(seed) - 0.5) * 8).toFixed(1);
+        const changeNum = parseFloat(change);
+        const changeClass = changeNum > 0 ? 'text-green-400 glow-green' : changeNum < 0 ? 'text-red-400 glow-red' : 'text-zinc-500';
+        const changeIcon = changeNum > 0 ? '▲' : changeNum < 0 ? '▼' : '—';
+
+        const titleColor = isLight ? 'text-zinc-600' : 'text-zinc-400';
+        const priceColor = isLight ? 'text-black' : 'text-white';
+        const borderColor = isLight ? 'border-zinc-300' : 'border-zinc-800';
+
+        return `
+          <a href="${url}" target="_blank" class="market-link flex items-center border-r ${borderColor} transition-colors" style="text-decoration:none; gap:${gap}px; padding:0 ${padding}px;">
+            <span style="font-size:${emojiSize}px">${emoji}</span>
+            <div>
+              <div class="${titleColor} truncate" style="font-size:${titleSize}px; max-width:${maxWidth}px">${title}</div>
+              <div class="flex items-center" style="gap:${gap/2}px">
+                <span class="font-bold ${priceColor}" style="font-size:${priceSize}px">${pct}%</span>
+                <span class="${changeClass}" style="font-size:${changeSize}px">${changeIcon} ${Math.abs(changeNum)}%</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      // Duplicate for seamless loop
+      track.innerHTML = `
+        <div class="flex items-center shrink-0">${items}</div>
+        <div class="flex items-center shrink-0">${items}</div>
+      `;
+
+      loading.classList.add('hidden');
+      track.classList.remove('hidden');
+    }
+
+    // Fetch markets
+    async function fetchMarkets() {
+      try {
+        const res = await fetch(`${API_BASE}/markets/active?limit=15`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const markets = data.data || data.markets || data;
+
+        if (markets.length > 0) {
+          renderTicker(markets);
+        } else {
+          throw new Error('No markets');
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        document.getElementById('ticker-loading').innerHTML = `
+          <span class="text-red-400">Failed to load markets</span>
+        `;
+      }
+    }
+
+    fetchMarkets();
+    setInterval(fetchMarkets, 30000);
+  </script>
+</body>
+</html>

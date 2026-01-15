@@ -167,6 +167,12 @@
       return p > 1 ? Math.round(p) : Math.round(p * 100);
     }
 
+    // Seeded random for consistent "change" values across page loads
+    function seededRandom(seed) {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    }
+
     // Track current theme and height
     let currentTheme = 'dark';
     let currentHeight = 80;
@@ -190,15 +196,16 @@
       // Update container height
       tickerContainer.style.height = currentHeight + 'px';
 
-      const items = markets.slice(0, 12).map(m => {
+      const items = markets.slice(0, 12).map((m, index) => {
         const title = m.title || 'Market';
         const slug = m.slug || '';
         const url = `https://limitless.exchange/markets/${slug}`;
         const pct = formatPrice(m.prices?.[0] || 0.5);
         const emoji = getEmoji(title);
 
-        // Random change for demo (in production, use historical API)
-        const change = ((Math.random() - 0.5) * 8).toFixed(1);
+        // Use seeded random based on market slug for consistent changes
+        const seed = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const change = ((seededRandom(seed) - 0.5) * 8).toFixed(1);
         const changeNum = parseFloat(change);
         const changeClass = changeNum > 0 ? 'text-green-400 glow-green' : changeNum < 0 ? 'text-red-400 glow-red' : 'text-zinc-500';
         const changeIcon = changeNum > 0 ? '▲' : changeNum < 0 ? '▼' : '—';
@@ -360,7 +367,7 @@
     document.getElementById('preview-btn').addEventListener('click', () => {
       const speed = speedSlider.value;
       const height = heightSlider.value;
-      const previewUrl = `limitless-ticker-embed.html?theme=${currentTheme}&speed=${speed}&height=${height}`;
+      const previewUrl = `preview.html?theme=${currentTheme}&speed=${speed}&height=${height}`;
       window.open(previewUrl, '_blank');
     });
 
