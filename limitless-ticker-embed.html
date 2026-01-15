@@ -270,7 +270,7 @@
     const height = parseInt(params.get('height')) || 80;
     const transparent = params.get('transparent') === 'true';
     const showIcons = params.get('icons') !== 'false';
-    const showVolume = params.get('volume') !== 'false';
+    const showVolume = params.get('volume') === 'true'; // disabled by default
     const limit = parseInt(params.get('limit')) || 15;
     const sortBy = params.get('sort') || 'volume'; // volume, liquidity, newest
 
