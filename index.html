@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limitless Livestream Ticker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-track {
+      animation: scroll var(--duration, 30s) linear infinite;
+    }
+    .ticker-track:hover {
+      animation-play-state: paused;
+    }
+    .glow-green { text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+    .glow-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+    .code-block {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+    }
+    .market-link:hover {
+      background: rgba(255,255,255,0.05);
+    }
+  </style>
+</head>
+<body class="bg-[#0A0A0A] text-white min-h-screen">
+
+  <div class="max-w-5xl mx-auto px-4 py-16">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800 text-sm text-zinc-400 mb-6">
+        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+        Live Data
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">Limitless Livestream Ticker</h1>
+      <p class="text-xl text-zinc-400 max-w-2xl mx-auto">
+        Add live prediction market odds to your livestream or website.
+      </p>
+    </div>
+
+    <!-- Live Ticker Preview -->
+    <div class="mb-16">
+      <h2 class="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-4">Live Preview</h2>
+      <div id="ticker-container" class="relative overflow-hidden rounded-xl border border-zinc-800 bg-[#0f0f0f]">
+
+        <!-- Loading State -->
+        <div id="ticker-loading" class="flex items-center justify-center py-6 text-zinc-400">
+          <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Loading live markets from Limitless...
+        </div>
+
+        <!-- Ticker Track (populated by JS) -->
+        <div class="ticker-track hidden flex items-center py-4" id="ticker-track" style="--duration: 25s;"></div>
+
+        <!-- Gradient overlays -->
+        <div class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0f0f0f] to-transparent pointer-events-none"></div>
+        <div class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0f0f0f] to-transparent pointer-events-none"></div>
+      </div>
+      <p class="text-xs text-zinc-500 mt-2 text-center">Hover to pause • Click market to trade on limitless.exchange</p>
+    </div>
+
+    <!-- Customization -->
+    <div class="grid md:grid-cols-2 gap-8 mb-16">
+      <div>
+        <h2 class="text-xl font-semibold mb-6">Customize Your Ticker</h2>
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-zinc-400 mb-3">Theme</label>
+            <div class="flex gap-3">
+              <button id="theme-dark" class="flex-1 py-3 px-4 rounded-lg border-2 border-white bg-zinc-900 text-white font-medium">Dark</button>
+              <button id="theme-light" class="flex-1 py-3 px-4 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 font-medium hover:border-zinc-600">Light</button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-400 mb-3">Scroll Speed</label>
+            <input type="range" id="speed-slider" min="15" max="60" value="25" class="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-white">
+            <div class="flex justify-between text-xs text-zinc-500 mt-1">
+              <span>Fast</span>
+              <span id="speed-value">25s</span>
+              <span>Slow</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-400 mb-3">Height</label>
+            <input type="range" id="height-slider" min="60" max="120" value="80" class="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-white">
+            <div class="flex justify-between text-xs text-zinc-500 mt-1">
+              <span>Compact</span>
+              <span id="height-value">80px</span>
+              <span>Large</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold mb-6">Embed Code</h2>
+        <div class="code-block text-green-400 mb-4">
+          <pre id="embed-code">&lt;iframe
+  src="https://limitless.exchange/ticker?theme=dark&speed=25"
+  width="100%"
+  height="80"
+  frameborder="0"
+&gt;&lt;/iframe&gt;</pre>
+        </div>
+        <div class="flex gap-3">
+          <button id="copy-btn" class="flex-1 py-3 px-4 rounded-lg bg-white text-black font-semibold hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Copy
+          </button>
+          <button id="preview-btn" class="flex-1 py-3 px-4 rounded-lg bg-zinc-800 text-white font-semibold hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2 border border-zinc-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            Preview
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center py-8 border-t border-zinc-800">
+      <a href="https://limitless.exchange" class="text-zinc-400 hover:text-white transition-colors">
+        Powered by <span class="font-semibold text-white">limitless.exchange</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // API Configuration
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE = isLocal ? '/api' : 'https://api.limitless.exchange';
+
+    // Get emoji for market
+    function getEmoji(title) {
+      const t = title.toLowerCase();
+      if (t.includes('btc') || t.includes('bitcoin')) return '₿';
+      if (t.includes('eth')) return 'Ξ';
+      if (t.includes('sol')) return '◎';
+      if (t.includes('doge')) return '🐕';
+      if (t.includes('xrp')) return '💧';
+      if (t.includes('bnb')) return '💛';
+      if (t.includes('avax')) return '🔺';
+      if (t.includes('trump') || t.includes('biden') || t.includes('election')) return '🇺🇸';
+      if (t.includes('nfl') || t.includes('nba') || t.includes('super bowl')) return '🏆';
+      if (t.includes('ai') || t.includes('gpt')) return '🤖';
+      return '📊';
+    }
+
+    // Format price as percentage
+    function formatPrice(price) {
+      const p = parseFloat(price);
+      return p > 1 ? Math.round(p) : Math.round(p * 100);
+    }
+
+    // Track current theme and height
+    let currentTheme = 'dark';
+    let currentHeight = 80;
+
+    // Render markets to ticker
+    function renderTicker(markets) {
+      const track = document.getElementById('ticker-track');
+      const loading = document.getElementById('ticker-loading');
+      const isLight = currentTheme === 'light';
+
+      // Scale factor based on height (80px = 1.0)
+      const scale = currentHeight / 80;
+      const emojiSize = Math.round(20 * scale);
+      const titleSize = Math.round(14 * scale);
+      const priceSize = Math.round(18 * scale);
+      const changeSize = Math.round(12 * scale);
+      const padding = Math.round(24 * scale);
+      const gap = Math.round(12 * scale);
+      const maxWidth = Math.round(200 * scale);
+
+      // Update container height
+      tickerContainer.style.height = currentHeight + 'px';
+
+      const items = markets.slice(0, 12).map(m => {
+        const title = m.title || 'Market';
+        const slug = m.slug || '';
+        const url = `https://limitless.exchange/markets/${slug}`;
+        const pct = formatPrice(m.prices?.[0] || 0.5);
+        const emoji = getEmoji(title);
+
+        // Random change for demo (in production, use historical API)
+        const change = ((Math.random() - 0.5) * 8).toFixed(1);
+        const changeNum = parseFloat(change);
+        const changeClass = changeNum > 0 ? 'text-green-400 glow-green' : changeNum < 0 ? 'text-red-400 glow-red' : 'text-zinc-500';
+        const changeIcon = changeNum > 0 ? '▲' : changeNum < 0 ? '▼' : '—';
+
+        const titleColor = isLight ? 'text-zinc-600' : 'text-zinc-400';
+        const priceColor = isLight ? 'text-black' : 'text-white';
+        const borderColor = isLight ? 'border-zinc-300' : 'border-zinc-800';
+
+        return `
+          <a href="${url}" target="_blank" class="market-link flex items-center border-r ${borderColor} transition-colors" style="text-decoration:none; gap:${gap}px; padding:0 ${padding}px;">
+            <span style="font-size:${emojiSize}px">${emoji}</span>
+            <div>
+              <div class="${titleColor} truncate" style="font-size:${titleSize}px; max-width:${maxWidth}px">${title}</div>
+              <div class="flex items-center" style="gap:${gap/2}px">
+                <span class="font-bold ${priceColor}" style="font-size:${priceSize}px">${pct}%</span>
+                <span class="${changeClass}" style="font-size:${changeSize}px">${changeIcon} ${Math.abs(changeNum)}%</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      // Duplicate for seamless loop
+      track.innerHTML = `
+        <div class="flex items-center shrink-0">${items}</div>
+        <div class="flex items-center shrink-0">${items}</div>
+      `;
+
+      // Show ticker, hide loading
+      loading.classList.add('hidden');
+      track.classList.remove('hidden');
+    }
+
+    // Fetch markets from API
+    async function fetchMarkets() {
+      try {
+        console.log('Fetching from:', `${API_BASE}/markets/active?limit=15`);
+        const res = await fetch(`${API_BASE}/markets/active?limit=15`);
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const markets = data.data || data.markets || data;
+
+        console.log('Loaded', markets.length, 'markets');
+
+        if (markets.length > 0) {
+          renderTicker(markets);
+        } else {
+          throw new Error('No markets returned');
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        document.getElementById('ticker-loading').innerHTML = `
+          <span class="text-red-400">Failed to load markets. Make sure proxy server is running.</span>
+        `;
+      }
+    }
+
+    // Speed slider
+    const speedSlider = document.getElementById('speed-slider');
+    const speedValue = document.getElementById('speed-value');
+    const tickerTrack = document.getElementById('ticker-track');
+
+    speedSlider.addEventListener('input', (e) => {
+      speedValue.textContent = e.target.value + 's';
+      tickerTrack.style.setProperty('--duration', e.target.value + 's');
+      updateEmbedCode();
+    });
+
+    // Height slider
+    const heightSlider = document.getElementById('height-slider');
+    const heightValue = document.getElementById('height-value');
+
+    heightSlider.addEventListener('input', (e) => {
+      currentHeight = parseInt(e.target.value);
+      heightValue.textContent = currentHeight + 'px';
+      fetchMarkets(); // Re-render with new size
+      updateEmbedCode();
+    });
+
+    // Copy button
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      const code = document.getElementById('embed-code').textContent;
+      navigator.clipboard.writeText(code);
+      document.getElementById('copy-btn').innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        Copied!
+      `;
+      setTimeout(() => {
+        document.getElementById('copy-btn').innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Copy Embed Code
+        `;
+      }, 2000);
+    });
+
+    // Theme toggle
+    const themeDark = document.getElementById('theme-dark');
+    const themeLight = document.getElementById('theme-light');
+    const tickerContainer = document.getElementById('ticker-container');
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      const isLight = theme === 'light';
+
+      // Update container
+      tickerContainer.classList.toggle('bg-[#0f0f0f]', !isLight);
+      tickerContainer.classList.toggle('bg-white', isLight);
+      tickerContainer.classList.toggle('border-zinc-800', !isLight);
+      tickerContainer.classList.toggle('border-zinc-300', isLight);
+
+      // Update gradient overlays
+      const leftGrad = tickerContainer.querySelector('.absolute.left-0');
+      const rightGrad = tickerContainer.querySelector('.absolute.right-0');
+      if (isLight) {
+        leftGrad.style.background = 'linear-gradient(to right, white, transparent)';
+        rightGrad.style.background = 'linear-gradient(to left, white, transparent)';
+      } else {
+        leftGrad.style.background = 'linear-gradient(to right, #0f0f0f, transparent)';
+        rightGrad.style.background = 'linear-gradient(to left, #0f0f0f, transparent)';
+      }
+
+      // Update theme buttons
+      themeDark.classList.toggle('border-white', !isLight);
+      themeDark.classList.toggle('text-white', !isLight);
+      themeDark.classList.toggle('border-zinc-700', isLight);
+      themeDark.classList.toggle('text-zinc-400', isLight);
+      themeLight.classList.toggle('border-white', isLight);
+      themeLight.classList.toggle('text-white', isLight);
+      themeLight.classList.toggle('border-zinc-700', !isLight);
+      themeLight.classList.toggle('text-zinc-400', !isLight);
+
+      // Re-fetch to re-render with new theme
+      fetchMarkets();
+      updateEmbedCode();
+    }
+
+    themeDark.addEventListener('click', () => setTheme('dark'));
+    themeLight.addEventListener('click', () => setTheme('light'));
+
+    // Update embed code based on settings
+    function updateEmbedCode() {
+      const speed = speedSlider.value;
+      const height = heightSlider.value;
+      document.getElementById('embed-code').textContent = `<iframe
+  src="https://limitless.exchange/ticker?theme=${currentTheme}&speed=${speed}"
+  width="100%"
+  height="${height}"
+  frameborder="0"
+></iframe>`;
+    }
+
+    // Preview button
+    document.getElementById('preview-btn').addEventListener('click', () => {
+      const speed = speedSlider.value;
+      const height = heightSlider.value;
+      const previewUrl = `limitless-ticker-embed.html?theme=${currentTheme}&speed=${speed}&height=${height}`;
+      window.open(previewUrl, '_blank');
+    });
+
+    // Load markets on page load
+    fetchMarkets();
+
+    // Refresh every 30 seconds
+    setInterval(fetchMarkets, 30000);
+  </script>
+</body>
+</html>

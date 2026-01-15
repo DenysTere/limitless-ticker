@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limitless Ticker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    :root {
+      --bg-color: #0f0f0f;
+      --text-primary: #ffffff;
+      --text-secondary: #a3a3a3;
+      --border-color: #262626;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    body {
+      background: var(--bg-color);
+      overflow: hidden;
+    }
+
+    body.transparent {
+      background: transparent;
+    }
+
+    body.light {
+      --bg-color: #ffffff;
+      --text-primary: #0a0a0a;
+      --text-secondary: #525252;
+      --border-color: #e5e5e5;
+    }
+
+    .ticker-wrapper {
+      position: relative;
+      overflow: hidden;
+      background: var(--bg-color);
+      height: 72px;
+    }
+
+    body.transparent .ticker-wrapper {
+      background: transparent;
+    }
+
+    /* Loading state */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-color);
+      border-top-color: var(--text-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .ticker-track {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      animation: scroll var(--duration, 30s) linear infinite;
+    }
+
+    .ticker-track:hover {
+      animation-play-state: paused;
+    }
+
+    .ticker-content {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .market-item {
+      display: flex;
+      align-items: center;
+      gap: var(--gap, 12px);
+      padding: 0 var(--padding, 24px);
+      border-right: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: opacity 0.2s;
+      text-decoration: none;
+      height: 100%;
+    }
+
+    .market-item:hover {
+      opacity: 0.8;
+    }
+
+    .market-icon {
+      width: calc(32px * var(--scale, 1));
+      height: calc(32px * var(--scale, 1));
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--border-color);
+    }
+
+    .market-icon-emoji {
+      font-size: var(--emoji-size, 24px);
+      line-height: 1;
+      width: calc(32px * var(--scale, 1));
+      text-align: center;
+    }
+
+    .market-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .market-name {
+      font-size: var(--title-size, 13px);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      max-width: var(--max-width, 200px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .market-stats {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--gap, 12px) / 2);
+    }
+
+    .market-odds {
+      font-size: var(--price-size, 18px);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .market-change {
+      font-size: var(--change-size, 11px);
+      font-weight: 500;
+    }
+
+    .market-change.up {
+      color: var(--green);
+      text-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+    }
+
+    .market-change.down {
+      color: var(--red);
+      text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+
+    .market-change.neutral {
+      color: var(--text-secondary);
+    }
+
+    .market-volume {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Gradient fades */
+    .fade-left,
+    .fade-right {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .fade-left {
+      left: 0;
+      background: linear-gradient(to right, var(--bg-color), transparent);
+    }
+
+    .fade-right {
+      right: 0;
+      background: linear-gradient(to left, var(--bg-color), transparent);
+    }
+
+    body.transparent .fade-left,
+    body.transparent .fade-right {
+      display: none;
+    }
+
+    /* Limitless branding */
+    .branding {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--bg-color);
+      border-radius: 4px;
+      font-size: 10px;
+      color: var(--text-secondary);
+      z-index: 20;
+      opacity: 0.7;
+      text-decoration: none;
+    }
+
+    .branding:hover {
+      opacity: 1;
+    }
+
+    body.transparent .branding {
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+    }
+
+    /* Error state */
+    .error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--red);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticker-wrapper">
+    <div class="fade-left"></div>
+    <div class="fade-right"></div>
+
+    <div class="ticker-track" id="ticker-track">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        Loading markets...
+      </div>
+    </div>
+
+    <a href="https://limitless.exchange" target="_blank" class="branding">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      </svg>
+      limitless.exchange
+    </a>
+  </div>
+
+  <script>
+    // Parse URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const theme = params.get('theme') || 'dark';
+    const speed = parseInt(params.get('speed')) || 30;
+    const height = parseInt(params.get('height')) || 80;
+    const transparent = params.get('transparent') === 'true';
+    const showIcons = params.get('icons') !== 'false';
+    const showVolume = params.get('volume') !== 'false';
+    const limit = parseInt(params.get('limit')) || 15;
+    const sortBy = params.get('sort') || 'volume'; // volume, liquidity, newest
+
+    // Scale factor based on height (80px = 1.0)
+    const scale = height / 80;
+
+    // Apply settings
+    if (theme === 'light') document.body.classList.add('light');
+    if (transparent) document.body.classList.add('transparent');
+
+    const track = document.getElementById('ticker-track');
+    const wrapper = document.querySelector('.ticker-wrapper');
+    track.style.setProperty('--duration', speed + 's');
+    wrapper.style.height = height + 'px';
+
+    // Apply scaled CSS variables
+    document.documentElement.style.setProperty('--scale', scale);
+    document.documentElement.style.setProperty('--emoji-size', Math.round(24 * scale) + 'px');
+    document.documentElement.style.setProperty('--title-size', Math.round(13 * scale) + 'px');
+    document.documentElement.style.setProperty('--price-size', Math.round(18 * scale) + 'px');
+    document.documentElement.style.setProperty('--change-size', Math.round(11 * scale) + 'px');
+    document.documentElement.style.setProperty('--padding', Math.round(24 * scale) + 'px');
+    document.documentElement.style.setProperty('--gap', Math.round(12 * scale) + 'px');
+    document.documentElement.style.setProperty('--max-width', Math.round(200 * scale) + 'px');
+
+    // Category icons mapping
+    const categoryIcons = {
+      'politics': '🗳️',
+      'crypto': '₿',
+      'sports': '⚽',
+      'tech': '💻',
+      'entertainment': '🎬',
+      'finance': '📈',
+      'science': '🔬',
+      'gaming': '🎮',
+      'default': '📊'
+    };
+
+    // Get icon for market
+    function getMarketIcon(market) {
+      if (market.imageUrl) {
+        return `<img src="${market.imageUrl}" alt="" class="market-icon" onerror="this.style.display='none'">`;
+      }
+
+      // Try to determine category from market data
+      const title = (market.title || market.question || '').toLowerCase();
+      let emoji = categoryIcons.default;
+
+      if (title.includes('bitcoin') || title.includes('btc') || title.includes('eth') || title.includes('crypto')) {
+        emoji = '₿';
+      } else if (title.includes('trump') || title.includes('biden') || title.includes('election') || title.includes('president')) {
+        emoji = '🇺🇸';
+      } else if (title.includes('nfl') || title.includes('nba') || title.includes('super bowl') || title.includes('world cup')) {
+        emoji = '🏆';
+      } else if (title.includes('ai') || title.includes('gpt') || title.includes('openai') || title.includes('apple') || title.includes('google')) {
+        emoji = '🤖';
+      } else if (title.includes('fed') || title.includes('rate') || title.includes('stock') || title.includes('market')) {
+        emoji = '📈';
+      } else if (title.includes('spacex') || title.includes('nasa') || title.includes('mars') || title.includes('moon')) {
+        emoji = '🚀';
+      } else if (title.includes('movie') || title.includes('oscar') || title.includes('film') || title.includes('netflix')) {
+        emoji = '🎬';
+      }
+
+      return `<span class="market-icon-emoji">${emoji}</span>`;
+    }
+
+    // Format volume
+    function formatVolume(volume) {
+      if (!volume) return '';
+      const num = parseFloat(volume);
+      if (num >= 1000000) return '$' + (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return '$' + (num / 1000).toFixed(1) + 'K';
+      return '$' + num.toFixed(0);
+    }
+
+    // Format probability/price - handles both decimal (0.43) and percentage (43.0) formats
+    function formatOdds(price) {
+      if (!price && price !== 0) return '—';
+      const num = parseFloat(price);
+      // If > 1, it's already a percentage; if < 1, multiply by 100
+      const pct = num > 1 ? num : num * 100;
+      return Math.round(pct) + '%';
+    }
+
+    // Render markets
+    function renderMarkets(markets) {
+      if (!markets || markets.length === 0) {
+        track.innerHTML = '<div class="error">No active markets found</div>';
+        return;
+      }
+
+      function createMarketItem(market) {
+        // prices[0] is YES probability (e.g., 0.025 = 2.5%, 0.975 = 97.5%)
+        const odds = market.prices?.[0] || market.lastPrice || market.price || 0.5;
+        // volumeFormatted is already in readable format, or parse raw volume
+        const volume = market.volumeFormatted ? parseFloat(market.volumeFormatted) : (parseFloat(market.volume) / 1000000 || 0);
+        const title = market.title || market.question || 'Unknown Market';
+        const slug = market.slug || market.address || '';
+        const url = `https://limitless.exchange/markets/${slug}`;
+
+        // Simulated 24h change (in production, use historical-price endpoint)
+        const change = ((Math.random() - 0.5) * 10).toFixed(1);
+        const changeNum = parseFloat(change);
+        const changeClass = changeNum > 0 ? 'up' : changeNum < 0 ? 'down' : 'neutral';
+        const changeSymbol = changeNum > 0 ? '▲' : changeNum < 0 ? '▼' : '—';
+        const changeValue = changeNum !== 0 ? Math.abs(changeNum) + '%' : '';
+
+        return `
+          <a href="${url}" target="_blank" class="market-item">
+            ${showIcons ? getMarketIcon(market) : ''}
+            <div class="market-info">
+              <span class="market-name">${title}</span>
+              <div class="market-stats">
+                <span class="market-odds">${formatOdds(odds)}</span>
+                <span class="market-change ${changeClass}">${changeSymbol} ${changeValue}</span>
+                ${showVolume ? `<span class="market-volume">${formatVolume(volume)}</span>` : ''}
+              </div>
+            </div>
+          </a>
+        `;
+      }
+
+      const content = markets.slice(0, limit).map(createMarketItem).join('');
+
+      // Duplicate for seamless loop
+      track.innerHTML = `
+        <div class="ticker-content">${content}</div>
+        <div class="ticker-content">${content}</div>
+      `;
+    }
+
+    // Fetch markets from Limitless API
+    async function fetchMarkets() {
+      try {
+        // Use proxy when running locally
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const apiBase = isLocal ? '/api' : 'https://api.limitless.exchange';
+      const response = await fetch(`${apiBase}/markets/active?limit=${limit}&sortBy=${sortBy}`);
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Handle API response structure - data is in 'data' array
+        const markets = data.data || data.markets || (Array.isArray(data) ? data : []);
+
+        if (markets.length === 0) {
+          // Fallback to sample data if API returns empty
+          renderMarkets(sampleMarkets);
+        } else {
+          renderMarkets(markets);
+        }
+      } catch (error) {
+        console.error('Failed to fetch markets:', error);
+        // Use sample data as fallback
+        renderMarkets(sampleMarkets);
+      }
+    }
+
+    // Sample fallback data
+    const sampleMarkets = [
+      { title: 'Trump wins 2028 Election', prices: [0.42], volume: 125000, slug: 'trump-2028' },
+      { title: 'BTC > $150K by July 2026', prices: [0.67], volume: 89000, slug: 'btc-150k' },
+      { title: 'Chiefs win Super Bowl', prices: [0.68], volume: 156000, slug: 'chiefs-superbowl' },
+      { title: 'GPT-5 releases in 2026', prices: [0.78], volume: 45000, slug: 'gpt5-2026' },
+      { title: 'Fed cuts rates in March', prices: [0.34], volume: 67000, slug: 'fed-rates-march' },
+      { title: 'SpaceX reaches Mars 2026', prices: [0.12], volume: 23000, slug: 'spacex-mars' },
+      { title: 'Apple releases AR glasses', prices: [0.45], volume: 34000, slug: 'apple-ar' },
+      { title: 'ETH flips BTC market cap', prices: [0.08], volume: 78000, slug: 'eth-flips-btc' },
+      { title: 'Tesla hits $500/share', prices: [0.31], volume: 52000, slug: 'tesla-500' },
+      { title: 'US enters recession 2026', prices: [0.28], volume: 91000, slug: 'us-recession' },
+    ];
+
+    // Initial fetch
+    fetchMarkets();
+
+    // Refresh every 30 seconds
+    setInterval(fetchMarkets, 30000);
+  </script>
+</body>
+</html>

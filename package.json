@@ -1,0 +1,8 @@
+{
+  "name": "limitless-ticker",
+  "version": "1.0.0",
+  "description": "Limitless Exchange Livestream Ticker",
+  "scripts": {
+    "dev": "python3 proxy-server.py"
+  }
+}

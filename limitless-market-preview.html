@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limitless Market Detail - Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .glow-green { box-shadow: 0 0 20px rgba(34, 197, 94, 0.15); }
+    .glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
+    .trade-btn:active { transform: scale(0.98); }
+  </style>
+</head>
+<body class="bg-[#0A0A0A] text-white min-h-screen">
+  <div class="max-w-2xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+      <button class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <span class="text-sm">Back</span>
+      </button>
+      <div class="flex items-center gap-3">
+        <button class="p-2 text-zinc-400 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+          </svg>
+        </button>
+        <button class="p-2 text-zinc-400 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Market Info -->
+    <div class="px-4 py-6">
+      <!-- Category & Timer -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🏈</span>
+          <span class="text-sm text-zinc-400">Sports · NFL</span>
+        </div>
+        <div class="flex items-center gap-1 text-sm text-zinc-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Closes: 2h 34m</span>
+        </div>
+      </div>
+
+      <!-- Question -->
+      <h1 class="text-2xl md:text-3xl font-bold text-white text-center mb-6">
+        Will the Chiefs win Super Bowl 2026?
+      </h1>
+
+      <!-- Probability Bar -->
+      <div class="relative h-12 rounded-lg overflow-hidden bg-zinc-900 mb-6">
+        <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-green-500/30 to-green-500/10 flex items-center pl-4" style="width: 68%">
+          <span class="text-green-400 font-semibold">YES 68%</span>
+        </div>
+        <div class="absolute inset-y-0 right-0 bg-gradient-to-l from-red-500/30 to-red-500/10 flex items-center justify-end pr-4" style="width: 32%">
+          <span class="text-red-400 font-semibold">NO 32%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trading Cards -->
+    <div class="px-4 pb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- YES Card -->
+        <div class="relative p-5 rounded-xl border bg-green-500/5 border-green-500/20 hover:border-green-500/40 transition-all duration-200 hover:scale-[1.01] glow-green">
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-green-400">BUY YES</h3>
+            <p class="text-sm text-zinc-400">0.68 per share</p>
+          </div>
+
+          <div class="flex gap-2 mb-4">
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-green-500 text-white">$10</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors">$50</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors">$100</button>
+          </div>
+
+          <div class="mb-4 relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+            <input type="number" value="10" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 pl-7 pr-3 text-white focus:outline-none focus:border-green-500/50">
+          </div>
+
+          <button class="trade-btn w-full py-3 px-4 rounded-lg font-semibold text-white bg-green-500 hover:bg-green-400 transition-all flex items-center justify-center gap-2">
+            Trade YES
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <p class="mt-3 text-center text-sm text-zinc-400">
+            Win <span class="font-semibold text-green-400">$14.70</span> if YES
+          </p>
+        </div>
+
+        <!-- NO Card -->
+        <div class="relative p-5 rounded-xl border bg-red-500/5 border-red-500/20 hover:border-red-500/40 transition-all duration-200 hover:scale-[1.01] glow-red">
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-red-400">BUY NO</h3>
+            <p class="text-sm text-zinc-400">0.32 per share</p>
+          </div>
+
+          <div class="flex gap-2 mb-4">
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-red-500 text-white">$10</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors">$50</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors">$100</button>
+          </div>
+
+          <div class="mb-4 relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+            <input type="number" value="10" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 pl-7 pr-3 text-white focus:outline-none focus:border-red-500/50">
+          </div>
+
+          <button class="trade-btn w-full py-3 px-4 rounded-lg font-semibold text-white bg-red-500 hover:bg-red-400 transition-all flex items-center justify-center gap-2">
+            Trade NO
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <p class="mt-3 text-center text-sm text-zinc-400">
+            Win <span class="font-semibold text-red-400">$31.25</span> if NO
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Proof -->
+    <div class="flex items-center justify-center gap-6 py-4 px-4 border-t border-zinc-800 text-sm text-zinc-400">
+      <div class="flex items-center gap-1">
+        <span>👥</span>
+        <span>1,247 traders</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <span>📊</span>
+        <span>$45.2K volume</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <span>🔥</span>
+        <span>Trending #3</span>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="mx-4 mb-4">
+      <details class="group">
+        <summary class="w-full flex items-center justify-between py-3 px-4 bg-zinc-900 rounded-lg text-sm text-zinc-300 hover:bg-zinc-800 transition-colors cursor-pointer list-none">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            How does this work?
+          </span>
+          <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </summary>
+        <div class="mt-2 p-4 bg-zinc-900 rounded-lg text-sm text-zinc-400 space-y-2">
+          <p><strong class="text-white">1.</strong> Buy shares in YES or NO based on what you think will happen.</p>
+          <p><strong class="text-white">2.</strong> Prices reflect the market's probability estimate.</p>
+          <p><strong class="text-white">3.</strong> If you're right, each share pays out $1. If wrong, $0.</p>
+          <p><strong class="text-white">4.</strong> You can sell your position anytime before the market closes.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Market Details -->
+    <div class="px-4 py-6 border-t border-zinc-800">
+      <h2 class="text-lg font-semibold mb-4">Market Details</h2>
+      <div class="space-y-4">
+        <div class="p-4 bg-zinc-900 rounded-lg">
+          <h3 class="text-sm font-medium text-zinc-300 mb-2">Resolution Criteria</h3>
+          <p class="text-sm text-zinc-400">
+            This market will resolve to YES if the Kansas City Chiefs win Super Bowl LX (60) according to official NFL results. Otherwise, it resolves to NO.
+          </p>
+        </div>
+        <div class="p-4 bg-zinc-900 rounded-lg">
+          <h3 class="text-sm font-medium text-zinc-300 mb-2">Resolution Source</h3>
+          <p class="text-sm text-zinc-400">Official NFL.com results</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Interactive amount selection
+    document.querySelectorAll('.grid > div').forEach(card => {
+      const buttons = card.querySelectorAll('.flex.gap-2 button');
+      const input = card.querySelector('input');
+      const winText = card.querySelector('p:last-child span');
+      const isYes = card.querySelector('h3').textContent.includes('YES');
+      const price = isYes ? 0.68 : 0.32;
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => {
+            b.classList.remove(isYes ? 'bg-green-500' : 'bg-red-500', 'text-white');
+            b.classList.add('bg-zinc-800', 'text-zinc-300');
+          });
+          btn.classList.remove('bg-zinc-800', 'text-zinc-300');
+          btn.classList.add(isYes ? 'bg-green-500' : 'bg-red-500', 'text-white');
+
+          const amount = parseInt(btn.textContent.replace('$', ''));
+          input.value = amount;
+          winText.textContent = '$' + (amount / price).toFixed(2);
+        });
+      });
+
+      input.addEventListener('input', () => {
+        const amount = parseFloat(input.value) || 0;
+        winText.textContent = '$' + (amount / price).toFixed(2);
+      });
+    });
+  </script>
+</body>
+</html>
