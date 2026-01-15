@@ -407,9 +407,8 @@
     async function fetchMarkets() {
       try {
         // Use proxy when running locally
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const apiBase = isLocal ? '/api' : 'https://api.limitless.exchange';
-      const response = await fetch(`${apiBase}/markets/active?limit=${limit}&sortBy=${sortBy}`);
+      // Always use /api/ proxy (works on localhost and Vercel)
+      const response = await fetch(`/api/markets/active?limit=${limit}&sortBy=${sortBy}`);
 
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);

@@ -142,9 +142,8 @@
   </div>
 
   <script>
-    // API Configuration
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const API_BASE = isLocal ? '/api' : 'https://api.limitless.exchange';
+    // API Configuration - always use /api/ proxy (works on localhost and Vercel)
+    const API_BASE = '/api';
 
     // Get emoji for market
     function getEmoji(title) {
