@@ -108,9 +108,7 @@
             <div class="flex flex-wrap gap-2" id="category-buttons">
               <button data-category="all" class="category-btn px-3 py-1.5 rounded-lg border-2 border-white bg-zinc-900 text-white text-sm font-medium">All</button>
               <button data-category="crypto" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Crypto</button>
-              <button data-category="politics" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Politics</button>
-              <button data-category="sports" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Sports</button>
-              <button data-category="finance" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Finance</button>
+              <button data-category="stocks" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Stocks</button>
             </div>
           </div>
         </div>
@@ -189,12 +187,10 @@
     let currentHeight = 80;
     let currentCategory = 'all';
 
-    // Category keywords for filtering
+    // Category keywords for filtering (based on market titles)
     const categoryKeywords = {
-      crypto: ['btc', 'bitcoin', 'eth', 'ethereum', 'sol', 'solana', 'doge', 'xrp', 'bnb', 'avax', 'crypto', 'token', 'coin', 'defi'],
-      politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'vote', 'democrat', 'republican', 'political', 'kamala', 'harris'],
-      sports: ['nfl', 'nba', 'mlb', 'nhl', 'super bowl', 'world cup', 'champions league', 'ufc', 'boxing', 'tennis', 'golf', 'olympics', 'f1', 'formula'],
-      finance: ['fed', 'rate', 'stock', 'nasdaq', 'dow', 'sp500', 's&p', 'treasury', 'gdp', 'inflation', 'recession', 'market', 'gold', 'oil']
+      crypto: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', '$mnt', '$bch', '$xmr', '$ondo', 'btc', 'eth', 'sol', 'doge', 'bitcoin', 'ethereum', 'solana', 'crypto'],
+      stocks: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', '$xom', '$eqt', '$xle', '$oxy', 'meta', 'nvda', 'nvidia', 'amazon', 'tesla', 'apple', 'google', 'stock']
     };
 
     // Filter markets by category

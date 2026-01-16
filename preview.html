@@ -66,12 +66,10 @@
     // API Configuration
     const API_BASE = '/api';
 
-    // Category keywords for filtering
+    // Category keywords for filtering (based on market titles)
     const categoryKeywords = {
-      crypto: ['btc', 'bitcoin', 'eth', 'ethereum', 'sol', 'solana', 'doge', 'xrp', 'bnb', 'avax', 'crypto', 'token', 'coin', 'defi'],
-      politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'vote', 'democrat', 'republican', 'political', 'kamala', 'harris'],
-      sports: ['nfl', 'nba', 'mlb', 'nhl', 'super bowl', 'world cup', 'champions league', 'ufc', 'boxing', 'tennis', 'golf', 'olympics', 'f1', 'formula'],
-      finance: ['fed', 'rate', 'stock', 'nasdaq', 'dow', 'sp500', 's&p', 'treasury', 'gdp', 'inflation', 'recession', 'market', 'gold', 'oil']
+      crypto: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', '$mnt', '$bch', '$xmr', '$ondo', 'btc', 'eth', 'sol', 'doge', 'bitcoin', 'ethereum', 'solana', 'crypto'],
+      stocks: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', '$xom', '$eqt', '$xle', '$oxy', 'meta', 'nvda', 'nvidia', 'amazon', 'tesla', 'apple', 'google', 'stock']
     };
 
     // Filter markets by category
