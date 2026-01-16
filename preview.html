@@ -61,9 +61,29 @@
     const theme = params.get('theme') || 'dark';
     const speed = parseInt(params.get('speed')) || 25;
     const height = parseInt(params.get('height')) || 80;
+    const category = params.get('category') || 'all';
 
     // API Configuration
     const API_BASE = '/api';
+
+    // Category keywords for filtering
+    const categoryKeywords = {
+      crypto: ['btc', 'bitcoin', 'eth', 'ethereum', 'sol', 'solana', 'doge', 'xrp', 'bnb', 'avax', 'crypto', 'token', 'coin', 'defi'],
+      politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'vote', 'democrat', 'republican', 'political', 'kamala', 'harris'],
+      sports: ['nfl', 'nba', 'mlb', 'nhl', 'super bowl', 'world cup', 'champions league', 'ufc', 'boxing', 'tennis', 'golf', 'olympics', 'f1', 'formula'],
+      finance: ['fed', 'rate', 'stock', 'nasdaq', 'dow', 'sp500', 's&p', 'treasury', 'gdp', 'inflation', 'recession', 'market', 'gold', 'oil']
+    };
+
+    // Filter markets by category
+    function filterByCategory(markets, cat) {
+      if (cat === 'all') return markets;
+      const keywords = categoryKeywords[cat] || [];
+      return markets.filter(m => {
+        const title = (m.title || '').toLowerCase();
+        const tags = (m.tags || []).map(t => t.toLowerCase());
+        return keywords.some(kw => title.includes(kw) || tags.some(tag => tag.includes(kw)));
+      });
+    }
 
     // Apply theme
     const isLight = theme === 'light';
@@ -170,15 +190,21 @@
     // Fetch markets
     async function fetchMarkets() {
       try {
-        const res = await fetch(`${API_BASE}/markets/active?limit=15`);
+        const fetchLimit = category === 'all' ? 15 : 50;
+        const res = await fetch(`${API_BASE}/markets/active?limit=${fetchLimit}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        const markets = data.data || data.markets || data;
+        let markets = data.data || data.markets || data;
+
+        // Apply category filter
+        markets = filterByCategory(markets, category);
 
         if (markets.length > 0) {
           renderTicker(markets);
         } else {
-          throw new Error('No markets');
+          document.getElementById('ticker-loading').innerHTML = `
+            <span class="text-zinc-400">No markets found for this category</span>
+          `;
         }
       } catch (err) {
         console.error('Fetch error:', err);

@@ -103,6 +103,16 @@
               <span>Large</span>
             </div>
           </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-400 mb-3">Categories</label>
+            <div class="flex flex-wrap gap-2" id="category-buttons">
+              <button data-category="all" class="category-btn px-3 py-1.5 rounded-lg border-2 border-white bg-zinc-900 text-white text-sm font-medium">All</button>
+              <button data-category="crypto" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Crypto</button>
+              <button data-category="politics" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Politics</button>
+              <button data-category="sports" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Sports</button>
+              <button data-category="finance" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Finance</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -174,9 +184,34 @@
       return x - Math.floor(x);
     }
 
-    // Track current theme and height
+    // Track current theme, height, and category
     let currentTheme = 'dark';
     let currentHeight = 80;
+    let currentCategory = 'all';
+
+    // Category keywords for filtering
+    const categoryKeywords = {
+      crypto: ['btc', 'bitcoin', 'eth', 'ethereum', 'sol', 'solana', 'doge', 'xrp', 'bnb', 'avax', 'crypto', 'token', 'coin', 'defi'],
+      politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'vote', 'democrat', 'republican', 'political', 'kamala', 'harris'],
+      sports: ['nfl', 'nba', 'mlb', 'nhl', 'super bowl', 'world cup', 'champions league', 'ufc', 'boxing', 'tennis', 'golf', 'olympics', 'f1', 'formula'],
+      finance: ['fed', 'rate', 'stock', 'nasdaq', 'dow', 'sp500', 's&p', 'treasury', 'gdp', 'inflation', 'recession', 'market', 'gold', 'oil']
+    };
+
+    // Filter markets by category
+    function filterByCategory(markets, category) {
+      if (category === 'all') return markets;
+
+      const keywords = categoryKeywords[category] || [];
+      return markets.filter(m => {
+        const title = (m.title || '').toLowerCase();
+        const tags = (m.tags || []).map(t => t.toLowerCase());
+
+        // Check if title or tags contain any keyword
+        return keywords.some(kw =>
+          title.includes(kw) || tags.some(tag => tag.includes(kw))
+        );
+      });
+    }
 
     // Render markets to ticker
     function renderTicker(markets) {
@@ -239,21 +274,33 @@
       track.classList.remove('hidden');
     }
 
+    // Store all markets for filtering
+    let allMarkets = [];
+
     // Fetch markets from API
     async function fetchMarkets() {
       try {
-        console.log('Fetching from:', `${API_BASE}/markets/active?limit=15`);
-        const res = await fetch(`${API_BASE}/markets/active?limit=15`);
+        console.log('Fetching from:', `${API_BASE}/markets/active?limit=50`);
+        const res = await fetch(`${API_BASE}/markets/active?limit=50`);
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
-        const markets = data.data || data.markets || data;
+        allMarkets = data.data || data.markets || data;
 
-        console.log('Loaded', markets.length, 'markets');
+        console.log('Loaded', allMarkets.length, 'markets');
 
-        if (markets.length > 0) {
-          renderTicker(markets);
+        if (allMarkets.length > 0) {
+          const filtered = filterByCategory(allMarkets, currentCategory);
+          if (filtered.length > 0) {
+            renderTicker(filtered);
+          } else {
+            document.getElementById('ticker-loading').classList.remove('hidden');
+            document.getElementById('ticker-track').classList.add('hidden');
+            document.getElementById('ticker-loading').innerHTML = `
+              <span class="text-zinc-400">No markets found for this category</span>
+            `;
+          }
         } else {
           throw new Error('No markets returned');
         }
@@ -262,6 +309,22 @@
         document.getElementById('ticker-loading').innerHTML = `
           <span class="text-red-400">Failed to load markets. Make sure proxy server is running.</span>
         `;
+      }
+    }
+
+    // Re-render with current category (no re-fetch needed)
+    function applyCategory() {
+      if (allMarkets.length > 0) {
+        const filtered = filterByCategory(allMarkets, currentCategory);
+        if (filtered.length > 0) {
+          renderTicker(filtered);
+        } else {
+          document.getElementById('ticker-loading').classList.remove('hidden');
+          document.getElementById('ticker-track').classList.add('hidden');
+          document.getElementById('ticker-loading').innerHTML = `
+            <span class="text-zinc-400">No markets found for this category</span>
+          `;
+        }
       }
     }
 
@@ -351,12 +414,33 @@
     themeDark.addEventListener('click', () => setTheme('dark'));
     themeLight.addEventListener('click', () => setTheme('light'));
 
+    // Category buttons
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    categoryButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentCategory = btn.dataset.category;
+
+        // Update button styles
+        categoryButtons.forEach(b => {
+          const isActive = b.dataset.category === currentCategory;
+          b.classList.toggle('border-white', isActive);
+          b.classList.toggle('text-white', isActive);
+          b.classList.toggle('border-zinc-700', !isActive);
+          b.classList.toggle('text-zinc-400', !isActive);
+        });
+
+        applyCategory();
+        updateEmbedCode();
+      });
+    });
+
     // Update embed code based on settings
     function updateEmbedCode() {
       const speed = speedSlider.value;
       const height = heightSlider.value;
+      const categoryParam = currentCategory !== 'all' ? `&category=${currentCategory}` : '';
       document.getElementById('embed-code').textContent = `<iframe
-  src="https://limitless-ticker-arz5.vercel.app/limitless-ticker-embed.html?theme=${currentTheme}&speed=${speed}&height=${height}"
+  src="https://limitless-ticker-arz5.vercel.app/limitless-ticker-embed.html?theme=${currentTheme}&speed=${speed}&height=${height}${categoryParam}"
   width="100%"
   height="${height}"
   frameborder="0"
@@ -367,7 +451,8 @@
     document.getElementById('preview-btn').addEventListener('click', () => {
       const speed = speedSlider.value;
       const height = heightSlider.value;
-      const previewUrl = `preview.html?theme=${currentTheme}&speed=${speed}&height=${height}`;
+      const categoryParam = currentCategory !== 'all' ? `&category=${currentCategory}` : '';
+      const previewUrl = `preview.html?theme=${currentTheme}&speed=${speed}&height=${height}${categoryParam}`;
       window.open(previewUrl, '_blank');
     });
 

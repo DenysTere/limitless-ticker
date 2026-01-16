@@ -274,6 +274,26 @@
     const showVolume = params.get('volume') === 'true'; // disabled by default
     const limit = parseInt(params.get('limit')) || 15;
     const sortBy = params.get('sort') || 'volume'; // volume, liquidity, newest
+    const category = params.get('category') || 'all';
+
+    // Category keywords for filtering
+    const categoryKeywords = {
+      crypto: ['btc', 'bitcoin', 'eth', 'ethereum', 'sol', 'solana', 'doge', 'xrp', 'bnb', 'avax', 'crypto', 'token', 'coin', 'defi'],
+      politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'vote', 'democrat', 'republican', 'political', 'kamala', 'harris'],
+      sports: ['nfl', 'nba', 'mlb', 'nhl', 'super bowl', 'world cup', 'champions league', 'ufc', 'boxing', 'tennis', 'golf', 'olympics', 'f1', 'formula'],
+      finance: ['fed', 'rate', 'stock', 'nasdaq', 'dow', 'sp500', 's&p', 'treasury', 'gdp', 'inflation', 'recession', 'market', 'gold', 'oil']
+    };
+
+    // Filter markets by category
+    function filterByCategory(markets, cat) {
+      if (cat === 'all') return markets;
+      const keywords = categoryKeywords[cat] || [];
+      return markets.filter(m => {
+        const title = (m.title || '').toLowerCase();
+        const tags = (m.tags || []).map(t => t.toLowerCase());
+        return keywords.some(kw => title.includes(kw) || tags.some(tag => tag.includes(kw)));
+      });
+    }
 
     // Scale factor based on height (80px = 1.0)
     const scale = height / 80;
@@ -407,9 +427,11 @@
     // Fetch markets from Limitless API
     async function fetchMarkets() {
       try {
-        // Use proxy when running locally
-      // Always use /api/ proxy (works on localhost and Vercel)
-      const response = await fetch(`/api/markets/active?limit=${limit}&sortBy=${sortBy}`);
+        // Fetch more markets if filtering by category
+        const fetchLimit = category === 'all' ? limit : 50;
+
+        // Always use /api/ proxy (works on localhost and Vercel)
+        const response = await fetch(`/api/markets/active?limit=${fetchLimit}&sortBy=${sortBy}`);
 
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -418,18 +440,23 @@
         const data = await response.json();
 
         // Handle API response structure - data is in 'data' array
-        const markets = data.data || data.markets || (Array.isArray(data) ? data : []);
+        let markets = data.data || data.markets || (Array.isArray(data) ? data : []);
+
+        // Apply category filter
+        markets = filterByCategory(markets, category);
 
         if (markets.length === 0) {
           // Fallback to sample data if API returns empty
-          renderMarkets(sampleMarkets);
+          const filteredSample = filterByCategory(sampleMarkets, category);
+          renderMarkets(filteredSample.length > 0 ? filteredSample : sampleMarkets);
         } else {
           renderMarkets(markets);
         }
       } catch (error) {
         console.error('Failed to fetch markets:', error);
         // Use sample data as fallback
-        renderMarkets(sampleMarkets);
+        const filteredSample = filterByCategory(sampleMarkets, category);
+        renderMarkets(filteredSample.length > 0 ? filteredSample : sampleMarkets);
       }
     }
 
