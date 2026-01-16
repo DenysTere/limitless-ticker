@@ -276,20 +276,44 @@
     const sortBy = params.get('sort') || 'volume'; // volume, liquidity, newest
     const category = params.get('category') || 'all';
 
-    // Category keywords for filtering (based on market titles)
-    const categoryKeywords = {
-      crypto: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', '$mnt', '$bch', '$xmr', '$ondo', 'btc', 'eth', 'sol', 'doge', 'bitcoin', 'ethereum', 'solana', 'crypto'],
-      stocks: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', '$xom', '$eqt', '$xle', '$oxy', 'meta', 'nvda', 'nvidia', 'amazon', 'tesla', 'apple', 'google', 'stock']
+    // Category configuration
+    const categoryConfig = {
+      crypto: {
+        searchTerms: ['BTC', 'ETH', 'SOL'],
+        categoryNames: ['Crypto', 'Hourly', 'Daily', 'Weekly'],
+        keywords: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', 'btc', 'eth', 'sol', 'bitcoin', 'ethereum']
+      },
+      stocks: {
+        searchTerms: ['TSLA', 'NVDA', 'META'],
+        categoryNames: ['Financials', 'Company News', 'Weekly'],
+        keywords: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', 'meta', 'nvda', 'tesla', 'apple', 'amazon']
+      },
+      sports: {
+        searchTerms: ['Serie', 'match', 'EPL', 'league'],
+        categoryNames: ['Sports', 'Football Matches', 'Off the Pitch'],
+        keywords: []
+      },
+      politics: {
+        searchTerms: ['Trump', 'election', 'president', 'Biden'],
+        categoryNames: ['Politics', 'US Election'],
+        keywords: ['trump', 'biden', 'election', 'president', 'congress']
+      }
     };
 
     // Filter markets by category
     function filterByCategory(markets, cat) {
       if (cat === 'all') return markets;
-      const keywords = categoryKeywords[cat] || [];
+      const config = categoryConfig[cat];
+      if (!config) return markets;
+
       return markets.filter(m => {
         const title = (m.title || '').toLowerCase();
-        const tags = (m.tags || []).map(t => t.toLowerCase());
-        return keywords.some(kw => title.includes(kw) || tags.some(tag => tag.includes(kw)));
+        const categories = m.categories || [];
+        const inCategory = categories.some(c =>
+          config.categoryNames.some(name => c.toLowerCase().includes(name.toLowerCase()))
+        );
+        const hasKeyword = config.keywords.some(kw => title.includes(kw.toLowerCase()));
+        return inCategory || hasKeyword;
       });
     }
 
@@ -425,36 +449,48 @@
     // Fetch markets from Limitless API
     async function fetchMarkets() {
       try {
-        // Fetch more markets if filtering by category (API max is 25)
-        const fetchLimit = category === 'all' ? limit : 25;
+        let markets = [];
 
-        // Always use /api/ proxy (works on localhost and Vercel)
-        const response = await fetch(`/api/markets/active?limit=${fetchLimit}&sortBy=${sortBy}`);
+        if (category === 'all') {
+          // Use active endpoint for "All"
+          const response = await fetch(`/api/markets/active?limit=${limit}&sortBy=${sortBy}`);
+          if (!response.ok) throw new Error(`API error: ${response.status}`);
+          const data = await response.json();
+          markets = data.data || data.markets || (Array.isArray(data) ? data : []);
+        } else {
+          // Use search endpoint for specific categories
+          const config = categoryConfig[category];
+          if (config && config.searchTerms.length > 0) {
+            const searchPromises = config.searchTerms.map(term =>
+              fetch(`/api/markets/search?query=${encodeURIComponent(term)}&limit=15`)
+                .then(r => r.ok ? r.json() : { markets: [] })
+                .catch(() => ({ markets: [] }))
+            );
 
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+            const results = await Promise.all(searchPromises);
+            const allSearched = results.flatMap(r => r.markets || []);
+
+            // Remove duplicates by ID
+            const seen = new Set();
+            markets = allSearched.filter(m => {
+              if (seen.has(m.id)) return false;
+              seen.add(m.id);
+              return true;
+            });
+
+            // Filter by category names
+            markets = filterByCategory(markets, category);
+          }
         }
 
-        const data = await response.json();
-
-        // Handle API response structure - data is in 'data' array
-        let markets = data.data || data.markets || (Array.isArray(data) ? data : []);
-
-        // Apply category filter
-        markets = filterByCategory(markets, category);
-
         if (markets.length === 0) {
-          // Fallback to sample data if API returns empty
-          const filteredSample = filterByCategory(sampleMarkets, category);
-          renderMarkets(filteredSample.length > 0 ? filteredSample : sampleMarkets);
+          renderMarkets(sampleMarkets);
         } else {
           renderMarkets(markets);
         }
       } catch (error) {
         console.error('Failed to fetch markets:', error);
-        // Use sample data as fallback
-        const filteredSample = filterByCategory(sampleMarkets, category);
-        renderMarkets(filteredSample.length > 0 ? filteredSample : sampleMarkets);
+        renderMarkets(sampleMarkets);
       }
     }
 

@@ -66,20 +66,44 @@
     // API Configuration
     const API_BASE = '/api';
 
-    // Category keywords for filtering (based on market titles)
-    const categoryKeywords = {
-      crypto: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', '$mnt', '$bch', '$xmr', '$ondo', 'btc', 'eth', 'sol', 'doge', 'bitcoin', 'ethereum', 'solana', 'crypto'],
-      stocks: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', '$xom', '$eqt', '$xle', '$oxy', 'meta', 'nvda', 'nvidia', 'amazon', 'tesla', 'apple', 'google', 'stock']
+    // Category configuration
+    const categoryConfig = {
+      crypto: {
+        searchTerms: ['BTC', 'ETH', 'SOL'],
+        categoryNames: ['Crypto', 'Hourly', 'Daily', 'Weekly'],
+        keywords: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', 'btc', 'eth', 'sol', 'bitcoin', 'ethereum']
+      },
+      stocks: {
+        searchTerms: ['TSLA', 'NVDA', 'META'],
+        categoryNames: ['Financials', 'Company News', 'Weekly'],
+        keywords: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', 'meta', 'nvda', 'tesla', 'apple', 'amazon']
+      },
+      sports: {
+        searchTerms: ['Serie', 'match', 'EPL', 'league'],
+        categoryNames: ['Sports', 'Football Matches', 'Off the Pitch'],
+        keywords: []
+      },
+      politics: {
+        searchTerms: ['Trump', 'election', 'president', 'Biden'],
+        categoryNames: ['Politics', 'US Election'],
+        keywords: ['trump', 'biden', 'election', 'president', 'congress']
+      }
     };
 
     // Filter markets by category
     function filterByCategory(markets, cat) {
       if (cat === 'all') return markets;
-      const keywords = categoryKeywords[cat] || [];
+      const config = categoryConfig[cat];
+      if (!config) return markets;
+
       return markets.filter(m => {
         const title = (m.title || '').toLowerCase();
-        const tags = (m.tags || []).map(t => t.toLowerCase());
-        return keywords.some(kw => title.includes(kw) || tags.some(tag => tag.includes(kw)));
+        const categories = m.categories || [];
+        const inCategory = categories.some(c =>
+          config.categoryNames.some(name => c.toLowerCase().includes(name.toLowerCase()))
+        );
+        const hasKeyword = config.keywords.some(kw => title.includes(kw.toLowerCase()));
+        return inCategory || hasKeyword;
       });
     }
 
@@ -188,14 +212,37 @@
     // Fetch markets
     async function fetchMarkets() {
       try {
-        const fetchLimit = category === 'all' ? 15 : 25;
-        const res = await fetch(`${API_BASE}/markets/active?limit=${fetchLimit}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        let markets = data.data || data.markets || data;
+        let markets = [];
 
-        // Apply category filter
-        markets = filterByCategory(markets, category);
+        if (category === 'all') {
+          const res = await fetch(`${API_BASE}/markets/active?limit=15`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          markets = data.data || data.markets || data;
+        } else {
+          // Use search endpoint for specific categories
+          const config = categoryConfig[category];
+          if (config && config.searchTerms.length > 0) {
+            const searchPromises = config.searchTerms.map(term =>
+              fetch(`${API_BASE}/markets/search?query=${encodeURIComponent(term)}&limit=15`)
+                .then(r => r.ok ? r.json() : { markets: [] })
+                .catch(() => ({ markets: [] }))
+            );
+
+            const results = await Promise.all(searchPromises);
+            const allSearched = results.flatMap(r => r.markets || []);
+
+            // Remove duplicates
+            const seen = new Set();
+            markets = allSearched.filter(m => {
+              if (seen.has(m.id)) return false;
+              seen.add(m.id);
+              return true;
+            });
+
+            markets = filterByCategory(markets, category);
+          }
+        }
 
         if (markets.length > 0) {
           renderTicker(markets);

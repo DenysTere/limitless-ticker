@@ -109,6 +109,8 @@
               <button data-category="all" class="category-btn px-3 py-1.5 rounded-lg border-2 border-white bg-zinc-900 text-white text-sm font-medium">All</button>
               <button data-category="crypto" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Crypto</button>
               <button data-category="stocks" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Stocks</button>
+              <button data-category="sports" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Sports</button>
+              <button data-category="politics" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Politics</button>
             </div>
           </div>
         </div>
@@ -187,25 +189,50 @@
     let currentHeight = 80;
     let currentCategory = 'all';
 
-    // Category keywords for filtering (based on market titles)
-    const categoryKeywords = {
-      crypto: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', '$mnt', '$bch', '$xmr', '$ondo', 'btc', 'eth', 'sol', 'doge', 'bitcoin', 'ethereum', 'solana', 'crypto'],
-      stocks: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', '$xom', '$eqt', '$xle', '$oxy', 'meta', 'nvda', 'nvidia', 'amazon', 'tesla', 'apple', 'google', 'stock']
+    // Category configuration: search queries and category names to filter
+    const categoryConfig = {
+      crypto: {
+        searchTerms: ['BTC', 'ETH', 'SOL'],
+        categoryNames: ['Crypto', 'Hourly', 'Daily', 'Weekly'],
+        keywords: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', 'btc', 'eth', 'sol', 'bitcoin', 'ethereum']
+      },
+      stocks: {
+        searchTerms: ['TSLA', 'NVDA', 'META'],
+        categoryNames: ['Financials', 'Company News', 'Weekly'],
+        keywords: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', 'meta', 'nvda', 'tesla', 'apple', 'amazon']
+      },
+      sports: {
+        searchTerms: ['Serie', 'match', 'EPL', 'league'],
+        categoryNames: ['Sports', 'Football Matches', 'Off the Pitch'],
+        keywords: []
+      },
+      politics: {
+        searchTerms: ['Trump', 'election', 'president', 'Biden'],
+        categoryNames: ['Politics', 'US Election'],
+        keywords: ['trump', 'biden', 'election', 'president', 'congress']
+      }
     };
 
-    // Filter markets by category
+    // Filter markets by category names or keywords
     function filterByCategory(markets, category) {
       if (category === 'all') return markets;
 
-      const keywords = categoryKeywords[category] || [];
+      const config = categoryConfig[category];
+      if (!config) return markets;
+
       return markets.filter(m => {
         const title = (m.title || '').toLowerCase();
-        const tags = (m.tags || []).map(t => t.toLowerCase());
+        const categories = m.categories || [];
 
-        // Check if title or tags contain any keyword
-        return keywords.some(kw =>
-          title.includes(kw) || tags.some(tag => tag.includes(kw))
+        // Check if market is in one of the category names
+        const inCategory = categories.some(cat =>
+          config.categoryNames.some(name => cat.toLowerCase().includes(name.toLowerCase()))
         );
+
+        // Check if title contains keywords
+        const hasKeyword = config.keywords.some(kw => title.includes(kw.toLowerCase()));
+
+        return inCategory || hasKeyword;
       });
     }
 
@@ -270,58 +297,81 @@
       track.classList.remove('hidden');
     }
 
-    // Store all markets for filtering
-    let allMarkets = [];
+    // Store markets cache per category
+    let marketsCache = {};
 
     // Fetch markets from API
     async function fetchMarkets() {
       try {
-        console.log('Fetching from:', `${API_BASE}/markets/active?limit=25`);
-        const res = await fetch(`${API_BASE}/markets/active?limit=25`);
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data = await res.json();
-        allMarkets = data.data || data.markets || data;
-
-        console.log('Loaded', allMarkets.length, 'markets');
-
-        if (allMarkets.length > 0) {
-          const filtered = filterByCategory(allMarkets, currentCategory);
-          if (filtered.length > 0) {
-            renderTicker(filtered);
-          } else {
-            document.getElementById('ticker-loading').classList.remove('hidden');
-            document.getElementById('ticker-track').classList.add('hidden');
-            document.getElementById('ticker-loading').innerHTML = `
-              <span class="text-zinc-400">No markets found for this category</span>
-            `;
-          }
-        } else {
-          throw new Error('No markets returned');
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
+        document.getElementById('ticker-loading').classList.remove('hidden');
+        document.getElementById('ticker-track').classList.add('hidden');
         document.getElementById('ticker-loading').innerHTML = `
-          <span class="text-red-400">Failed to load markets. Make sure proxy server is running.</span>
+          <div class="flex items-center">
+            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Loading markets...
+          </div>
         `;
-      }
-    }
 
-    // Re-render with current category (no re-fetch needed)
-    function applyCategory() {
-      if (allMarkets.length > 0) {
-        const filtered = filterByCategory(allMarkets, currentCategory);
-        if (filtered.length > 0) {
-          renderTicker(filtered);
+        let markets = [];
+
+        if (currentCategory === 'all') {
+          // Use active endpoint for "All"
+          const res = await fetch(`${API_BASE}/markets/active?limit=25`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          markets = data.data || data.markets || data;
         } else {
-          document.getElementById('ticker-loading').classList.remove('hidden');
-          document.getElementById('ticker-track').classList.add('hidden');
+          // Use search endpoint for specific categories
+          const config = categoryConfig[currentCategory];
+          if (config && config.searchTerms.length > 0) {
+            // Fetch from multiple search terms and combine
+            const searchPromises = config.searchTerms.map(term =>
+              fetch(`${API_BASE}/markets/search?query=${encodeURIComponent(term)}&limit=15`)
+                .then(r => r.ok ? r.json() : { markets: [] })
+                .catch(() => ({ markets: [] }))
+            );
+
+            const results = await Promise.all(searchPromises);
+            const allSearched = results.flatMap(r => r.markets || []);
+
+            // Remove duplicates by ID
+            const seen = new Set();
+            markets = allSearched.filter(m => {
+              if (seen.has(m.id)) return false;
+              seen.add(m.id);
+              return true;
+            });
+
+            // Filter by category names
+            markets = filterByCategory(markets, currentCategory);
+          }
+        }
+
+        console.log('Loaded', markets.length, 'markets for', currentCategory);
+
+        if (markets.length > 0) {
+          marketsCache[currentCategory] = markets;
+          renderTicker(markets);
+        } else {
           document.getElementById('ticker-loading').innerHTML = `
             <span class="text-zinc-400">No markets found for this category</span>
           `;
         }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        document.getElementById('ticker-loading').innerHTML = `
+          <span class="text-red-400">Failed to load markets</span>
+        `;
       }
+    }
+
+    // Re-render with current category
+    function applyCategory() {
+      // Always re-fetch when changing category
+      fetchMarkets();
     }
 
     // Speed slider
