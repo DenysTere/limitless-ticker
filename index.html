@@ -108,9 +108,10 @@
             <div class="flex flex-wrap gap-2" id="category-buttons">
               <button data-category="all" class="category-btn px-3 py-1.5 rounded-lg border-2 border-white bg-zinc-900 text-white text-sm font-medium">All</button>
               <button data-category="crypto" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Crypto</button>
-              <button data-category="stocks" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Stocks</button>
               <button data-category="sports" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Sports</button>
-              <button data-category="politics" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Politics</button>
+              <button data-category="football" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Football</button>
+              <button data-category="economy" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Economy</button>
+              <button data-category="company" class="category-btn px-3 py-1.5 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 text-sm font-medium hover:border-zinc-600">Company News</button>
             </div>
           </div>
         </div>
@@ -192,24 +193,29 @@
     // Category configuration: search queries and category names to filter
     const categoryConfig = {
       crypto: {
-        searchTerms: ['BTC', 'ETH', 'SOL'],
-        categoryNames: ['Crypto', 'Hourly', 'Daily', 'Weekly'],
-        keywords: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', 'btc', 'eth', 'sol', 'bitcoin', 'ethereum']
-      },
-      stocks: {
-        searchTerms: ['TSLA', 'NVDA', 'META'],
-        categoryNames: ['Financials', 'Company News', 'Weekly'],
-        keywords: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', 'meta', 'nvda', 'tesla', 'apple', 'amazon']
+        searchTerms: ['BTC', 'ETH', 'SOL', 'DOGE'],
+        categoryNames: ['Crypto'],
+        keywords: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', 'bitcoin', 'ethereum', 'crypto']
       },
       sports: {
-        searchTerms: ['Serie', 'match', 'EPL', 'league'],
-        categoryNames: ['Sports', 'Football Matches', 'Off the Pitch'],
-        keywords: []
+        searchTerms: ['winner', 'championship', 'UFC', 'NBA'],
+        categoryNames: ['Sports', 'Off the Pitch'],
+        keywords: ['sports', 'championship', 'winner']
       },
-      politics: {
-        searchTerms: ['Trump', 'election', 'president', 'Biden'],
-        categoryNames: ['Politics', 'US Election'],
-        keywords: ['trump', 'biden', 'election', 'president', 'congress']
+      football: {
+        searchTerms: ['Serie', 'EPL', 'Milan', 'Madrid'],
+        categoryNames: ['Football Matches'],
+        keywords: ['serie', 'epl', 'premier league', 'la liga']
+      },
+      economy: {
+        searchTerms: ['inflation', 'GDP', 'Fed', 'rate'],
+        categoryNames: ['Economy'],
+        keywords: ['inflation', 'gdp', 'fed', 'rate', 'economy']
+      },
+      company: {
+        searchTerms: ['Apple', 'Tesla', 'Google', 'earnings'],
+        categoryNames: ['Company News'],
+        keywords: ['apple', 'tesla', 'google', 'microsoft', 'earnings']
       }
     };
 

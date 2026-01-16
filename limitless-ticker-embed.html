@@ -279,24 +279,29 @@
     // Category configuration
     const categoryConfig = {
       crypto: {
-        searchTerms: ['BTC', 'ETH', 'SOL'],
-        categoryNames: ['Crypto', 'Hourly', 'Daily', 'Weekly'],
-        keywords: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', '$avax', 'btc', 'eth', 'sol', 'bitcoin', 'ethereum']
-      },
-      stocks: {
-        searchTerms: ['TSLA', 'NVDA', 'META'],
-        categoryNames: ['Financials', 'Company News', 'Weekly'],
-        keywords: ['$meta', '$nvda', '$amzn', '$tsla', '$aapl', '$goog', 'meta', 'nvda', 'tesla', 'apple', 'amazon']
+        searchTerms: ['BTC', 'ETH', 'SOL', 'DOGE'],
+        categoryNames: ['Crypto'],
+        keywords: ['$btc', '$eth', '$sol', '$doge', '$xrp', '$bnb', 'bitcoin', 'ethereum', 'crypto']
       },
       sports: {
-        searchTerms: ['Serie', 'match', 'EPL', 'league'],
-        categoryNames: ['Sports', 'Football Matches', 'Off the Pitch'],
-        keywords: []
+        searchTerms: ['winner', 'championship', 'UFC', 'NBA'],
+        categoryNames: ['Sports', 'Off the Pitch'],
+        keywords: ['sports', 'championship', 'winner']
       },
-      politics: {
-        searchTerms: ['Trump', 'election', 'president', 'Biden'],
-        categoryNames: ['Politics', 'US Election'],
-        keywords: ['trump', 'biden', 'election', 'president', 'congress']
+      football: {
+        searchTerms: ['Serie', 'EPL', 'Milan', 'Madrid'],
+        categoryNames: ['Football Matches'],
+        keywords: ['serie', 'epl', 'premier league', 'la liga']
+      },
+      economy: {
+        searchTerms: ['inflation', 'GDP', 'Fed', 'rate'],
+        categoryNames: ['Economy'],
+        keywords: ['inflation', 'gdp', 'fed', 'rate', 'economy']
+      },
+      company: {
+        searchTerms: ['Apple', 'Tesla', 'Google', 'earnings'],
+        categoryNames: ['Company News'],
+        keywords: ['apple', 'tesla', 'google', 'microsoft', 'earnings']
       }
     };
 
