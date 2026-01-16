@@ -190,7 +190,7 @@
     // Fetch markets
     async function fetchMarkets() {
       try {
-        const fetchLimit = category === 'all' ? 15 : 50;
+        const fetchLimit = category === 'all' ? 15 : 25;
         const res = await fetch(`${API_BASE}/markets/active?limit=${fetchLimit}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();

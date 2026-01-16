@@ -280,8 +280,8 @@
     // Fetch markets from API
     async function fetchMarkets() {
       try {
-        console.log('Fetching from:', `${API_BASE}/markets/active?limit=50`);
-        const res = await fetch(`${API_BASE}/markets/active?limit=50`);
+        console.log('Fetching from:', `${API_BASE}/markets/active?limit=25`);
+        const res = await fetch(`${API_BASE}/markets/active?limit=25`);
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 

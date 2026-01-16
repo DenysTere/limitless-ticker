@@ -427,8 +427,8 @@
     // Fetch markets from Limitless API
     async function fetchMarkets() {
       try {
-        // Fetch more markets if filtering by category
-        const fetchLimit = category === 'all' ? limit : 50;
+        // Fetch more markets if filtering by category (API max is 25)
+        const fetchLimit = category === 'all' ? limit : 25;
 
         // Always use /api/ proxy (works on localhost and Vercel)
         const response = await fetch(`/api/markets/active?limit=${fetchLimit}&sortBy=${sortBy}`);
