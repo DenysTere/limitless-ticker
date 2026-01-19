@@ -142,8 +142,9 @@
     // Adjust speed for mobile
     function getAdjustedSpeed(baseSpeed) {
       const width = window.innerWidth;
-      if (width < 640) return Math.max(8, baseSpeed * 0.4);
-      if (width < 1024) return Math.max(12, baseSpeed * 0.6);
+      if (width < 480) return Math.max(5, baseSpeed * 0.2); // Small mobile: 20%
+      if (width < 768) return Math.max(6, baseSpeed * 0.25); // Mobile: 25%
+      if (width < 1024) return Math.max(10, baseSpeed * 0.5); // Tablet: 50%
       return baseSpeed;
     }
 
@@ -183,9 +184,8 @@
       return x - Math.floor(x);
     }
 
-    // Track last rendered content
-    let lastRenderedContent = '';
-    let isInitialLoad = true;
+    // Track if loaded - skip refreshes to prevent jumping
+    let hasLoadedOnce = false;
 
     // Render markets (same logic as main page)
     function renderTicker(markets) {
@@ -237,17 +237,10 @@
         `;
       }).join('');
 
-      // Check if content changed to avoid animation jump
-      const newContent = `
+      track.innerHTML = `
         <div class="flex items-center shrink-0">${items}</div>
         <div class="flex items-center shrink-0">${items}</div>
       `;
-
-      if (isInitialLoad || newContent !== lastRenderedContent) {
-        lastRenderedContent = newContent;
-        track.innerHTML = newContent;
-        isInitialLoad = false;
-      }
 
       loading.classList.add('hidden');
       track.classList.remove('hidden');
@@ -255,6 +248,9 @@
 
     // Fetch markets
     async function fetchMarkets() {
+      // Skip refresh to prevent jumping
+      if (hasLoadedOnce) return;
+
       try {
         let markets = [];
 
@@ -290,6 +286,7 @@
 
         if (markets.length > 0) {
           renderTicker(markets);
+          hasLoadedOnce = true;
         } else {
           document.getElementById('ticker-loading').innerHTML = `
             <span class="text-zinc-400">No markets found for this category</span>

@@ -344,8 +344,9 @@
     // Adjust speed for mobile (narrower screens need faster animation)
     function getAdjustedSpeed(baseSpeed) {
       const width = window.innerWidth;
-      if (width < 640) return Math.max(8, baseSpeed * 0.4); // Mobile: 40% of base speed
-      if (width < 1024) return Math.max(12, baseSpeed * 0.6); // Tablet: 60% of base speed
+      if (width < 480) return Math.max(5, baseSpeed * 0.2); // Small mobile: 20% of base speed
+      if (width < 768) return Math.max(6, baseSpeed * 0.25); // Mobile: 25% of base speed
+      if (width < 1024) return Math.max(10, baseSpeed * 0.5); // Tablet: 50% of base speed
       return baseSpeed;
     }
 
@@ -427,9 +428,8 @@
       return Math.round(pct) + '%';
     }
 
-    // Track last rendered content to avoid jumps
-    let lastRenderedContent = '';
-    let isInitialLoad = true;
+    // Track if we've loaded once - skip all refreshes to prevent jumping
+    let hasLoadedOnce = false;
 
     // Render markets
     function renderMarkets(markets) {
@@ -471,22 +471,17 @@
 
       const content = markets.slice(0, limit).map(createMarketItem).join('');
 
-      // Check if content changed to avoid animation jump
-      const newContent = `
+      track.innerHTML = `
         <div class="ticker-content">${content}</div>
         <div class="ticker-content">${content}</div>
       `;
-
-      // Only update if initial load or content actually changed
-      if (isInitialLoad || newContent !== lastRenderedContent) {
-        lastRenderedContent = newContent;
-        track.innerHTML = newContent;
-        isInitialLoad = false;
-      }
     }
 
     // Fetch markets from Limitless API
     async function fetchMarkets() {
+      // Skip refresh to prevent jumping - only load once
+      if (hasLoadedOnce) return;
+
       try {
         let markets = [];
 
@@ -527,9 +522,11 @@
         } else {
           renderMarkets(markets);
         }
+        hasLoadedOnce = true;
       } catch (error) {
         console.error('Failed to fetch markets:', error);
         renderMarkets(sampleMarkets);
+        hasLoadedOnce = true;
       }
     }
 
