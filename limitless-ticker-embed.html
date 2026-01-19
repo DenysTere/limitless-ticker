@@ -133,6 +133,7 @@
       display: flex;
       align-items: center;
       flex-shrink: 0;
+      height: 100%;
     }
 
     .market-item {
@@ -170,6 +171,7 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
+      justify-content: center;
     }
 
     .market-name {
@@ -179,6 +181,7 @@
       max-width: var(--max-width, 200px);
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1.2;
     }
 
     .market-stats {
@@ -191,11 +194,13 @@
       font-size: var(--price-size, 18px);
       font-weight: 700;
       color: var(--text-primary);
+      line-height: 1;
     }
 
     .market-change {
       font-size: var(--change-size, 11px);
       font-weight: 500;
+      line-height: 1;
     }
 
     .market-change.up {
@@ -215,6 +220,22 @@
     .market-volume {
       font-size: 11px;
       color: var(--text-secondary);
+    }
+
+    /* Compact mode - single line layout */
+    .market-item.compact {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .market-item.compact .market-info {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--gap, 8px);
+    }
+
+    .market-item.compact .market-stats {
+      flex-direction: row;
     }
 
     /* Gradient fades */
@@ -363,15 +384,28 @@
     applySpeed();
     window.addEventListener('resize', applySpeed);
 
-    // Apply scaled CSS variables
+    // Apply scaled CSS variables with minimums for small heights
+    const isCompact = height < 50;
     document.documentElement.style.setProperty('--scale', scale);
-    document.documentElement.style.setProperty('--emoji-size', Math.round(24 * scale) + 'px');
-    document.documentElement.style.setProperty('--title-size', Math.round(13 * scale) + 'px');
-    document.documentElement.style.setProperty('--price-size', Math.round(18 * scale) + 'px');
-    document.documentElement.style.setProperty('--change-size', Math.round(11 * scale) + 'px');
-    document.documentElement.style.setProperty('--padding', Math.round(24 * scale) + 'px');
-    document.documentElement.style.setProperty('--gap', Math.round(12 * scale) + 'px');
-    document.documentElement.style.setProperty('--max-width', Math.round(200 * scale) + 'px');
+    document.documentElement.style.setProperty('--emoji-size', Math.max(12, Math.round(24 * scale)) + 'px');
+    document.documentElement.style.setProperty('--title-size', Math.max(8, Math.round(13 * scale)) + 'px');
+    document.documentElement.style.setProperty('--price-size', Math.max(10, Math.round(18 * scale)) + 'px');
+    document.documentElement.style.setProperty('--change-size', Math.max(8, Math.round(11 * scale)) + 'px');
+    document.documentElement.style.setProperty('--padding', Math.max(8, Math.round(24 * scale)) + 'px');
+    document.documentElement.style.setProperty('--gap', Math.max(4, Math.round(12 * scale)) + 'px');
+    document.documentElement.style.setProperty('--max-width', Math.max(80, Math.round(200 * scale)) + 'px');
+
+    // Scale branding
+    const branding = document.querySelector('.ticker-branding');
+    const brandingLogo = branding.querySelector('img');
+    const brandingText = branding.querySelector('span');
+    const logoSize = Math.max(12, Math.round(20 * scale));
+    brandingLogo.style.width = logoSize + 'px';
+    brandingLogo.style.height = logoSize + 'px';
+    brandingText.style.fontSize = Math.max(10, Math.round(14 * scale)) + 'px';
+    branding.style.padding = `0 ${Math.max(8, Math.round(16 * scale))}px`;
+    branding.style.gap = Math.max(4, Math.round(8 * scale)) + 'px';
+    if (isCompact) brandingText.style.display = 'none';
 
     // Category icons mapping
     const categoryIcons = {
@@ -459,6 +493,19 @@
         const changeClass = changeNum > 0 ? 'up' : changeNum < 0 ? 'down' : 'neutral';
         const changeSymbol = changeNum > 0 ? '▲' : changeNum < 0 ? '▼' : '—';
         const changeValue = changeNum !== 0 ? Math.abs(changeNum) + '%' : '';
+
+        // Compact mode: single line layout
+        if (isCompact) {
+          return `
+            <a href="${url}" target="_blank" class="market-item compact">
+              <div class="market-info">
+                <span class="market-name">${title}</span>
+                <span class="market-odds">${formatOdds(odds)}</span>
+                <span class="market-change ${changeClass}">${changeSymbol}${changeValue}</span>
+              </div>
+            </a>
+          `;
+        }
 
         return `
           <a href="${url}" target="_blank" class="market-item">

@@ -55,7 +55,7 @@
       </div>
 
       <!-- Ticker Track -->
-      <div class="ticker-track hidden flex items-center py-4" id="ticker-track"></div>
+      <div class="ticker-track hidden flex items-center" id="ticker-track" style="height:100%"></div>
 
       <!-- Gradient overlays -->
       <div id="fade-left" class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0f0f0f] to-transparent pointer-events-none"></div>
@@ -198,18 +198,34 @@
       const loading = document.getElementById('ticker-loading');
       const container = document.getElementById('ticker-container');
 
-      // Scale factor based on height
+      // Scale factor based on height (80px = 1.0)
       const scale = height / 80;
-      const emojiSize = Math.round(20 * scale);
-      const titleSize = Math.round(14 * scale);
-      const priceSize = Math.round(18 * scale);
-      const changeSize = Math.round(12 * scale);
-      const padding = Math.round(24 * scale);
-      const gap = Math.round(12 * scale);
-      const maxWidth = Math.round(200 * scale);
+      const isCompact = height < 50; // Single line mode for small heights
+      const titleSize = Math.max(8, Math.round(14 * scale));
+      const priceSize = Math.max(10, Math.round(18 * scale));
+      const changeSize = Math.max(8, Math.round(12 * scale));
+      const padding = Math.max(8, Math.round(24 * scale));
+      const gap = Math.max(4, Math.round(12 * scale));
+      const maxWidth = Math.max(80, Math.round(200 * scale));
 
       // Update container height
       container.style.height = height + 'px';
+
+      // Scale branding
+      const branding = document.getElementById('ticker-branding');
+      const brandingLogo = branding.querySelector('img');
+      const brandingText = branding.querySelector('span');
+      const logoSize = Math.max(12, Math.round(20 * scale));
+      brandingLogo.style.width = logoSize + 'px';
+      brandingLogo.style.height = logoSize + 'px';
+      brandingText.style.fontSize = Math.max(10, Math.round(14 * scale)) + 'px';
+      branding.style.padding = `0 ${Math.max(8, Math.round(16 * scale))}px`;
+      branding.style.gap = Math.max(4, Math.round(8 * scale)) + 'px';
+      if (isCompact) {
+        brandingText.style.display = 'none';
+      } else {
+        brandingText.style.display = '';
+      }
 
       const items = markets.slice(0, 12).map((m, index) => {
         const title = m.title || 'Market';
@@ -229,13 +245,24 @@
         const priceColor = isLight ? 'text-black' : 'text-white';
         const borderColor = isLight ? 'border-zinc-300' : 'border-zinc-800';
 
+        if (isCompact) {
+          // Single line for compact mode - all content inline
+          return `
+            <a href="${url}" target="_blank" class="market-link flex items-center border-r ${borderColor} transition-colors shrink-0" style="text-decoration:none; gap:${gap}px; padding:0 ${padding}px; height:100%;">
+              <span class="${titleColor} truncate" style="font-size:${titleSize}px; max-width:${maxWidth}px; line-height:1.2;">${title}</span>
+              <span class="font-bold ${priceColor} shrink-0" style="font-size:${priceSize}px; line-height:1;">${pct}%</span>
+              <span class="${changeClass} shrink-0" style="font-size:${changeSize}px; line-height:1;">${changeIcon}${Math.abs(changeNum)}%</span>
+            </a>
+          `;
+        }
+
         return `
-          <a href="${url}" target="_blank" class="market-link flex items-center border-r ${borderColor} transition-colors" style="text-decoration:none; gap:${gap}px; padding:0 ${padding}px;">
-            <div>
-              <div class="${titleColor} truncate" style="font-size:${titleSize}px; max-width:${maxWidth}px">${title}</div>
+          <a href="${url}" target="_blank" class="market-link flex items-center border-r ${borderColor} transition-colors shrink-0" style="text-decoration:none; gap:${gap}px; padding:0 ${padding}px; height:100%;">
+            <div class="flex flex-col justify-center">
+              <div class="${titleColor} truncate" style="font-size:${titleSize}px; max-width:${maxWidth}px; line-height:1.2;">${title}</div>
               <div class="flex items-center" style="gap:${gap/2}px">
-                <span class="font-bold ${priceColor}" style="font-size:${priceSize}px">${pct}%</span>
-                <span class="${changeClass}" style="font-size:${changeSize}px">${changeIcon} ${Math.abs(changeNum)}%</span>
+                <span class="font-bold ${priceColor}" style="font-size:${priceSize}px; line-height:1;">${pct}%</span>
+                <span class="${changeClass}" style="font-size:${changeSize}px; line-height:1;">${changeIcon} ${Math.abs(changeNum)}%</span>
               </div>
             </div>
           </a>
@@ -243,8 +270,8 @@
       }).join('');
 
       track.innerHTML = `
-        <div class="flex items-center shrink-0">${items}</div>
-        <div class="flex items-center shrink-0">${items}</div>
+        <div class="flex items-center shrink-0" style="height:100%">${items}</div>
+        <div class="flex items-center shrink-0" style="height:100%">${items}</div>
       `;
 
       loading.classList.add('hidden');
