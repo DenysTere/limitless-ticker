@@ -68,10 +68,7 @@
       background: rgba(0, 0, 0, 0.05);
     }
 
-    body.light .ticker-logo {
-      filter: brightness(0);
-    }
-
+    
     .ticker-branding span {
       font-weight: 600;
       font-size: 14px;
@@ -364,7 +361,10 @@
     const scale = height / 80;
 
     // Apply settings
-    if (theme === 'light') document.body.classList.add('light');
+    if (theme === 'light') {
+      document.body.classList.add('light');
+      document.querySelector('.ticker-logo').src = 'logo-black.png';
+    }
     if (transparent) document.body.classList.add('transparent');
 
     const track = document.getElementById('ticker-track');

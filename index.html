@@ -589,9 +589,9 @@
       // Update logo for theme
       const logo = document.getElementById('ticker-logo');
       if (isLight) {
-        logo.style.filter = 'brightness(0)'; // Make logo black for light mode
+        logo.src = 'logo-black.png';
       } else {
-        logo.style.filter = 'none'; // Original logo for dark mode
+        logo.src = 'https://limitless.exchange/assets/images/logo.svg';
       }
 
       // Update theme buttons
