@@ -39,7 +39,7 @@
   <div id="ticker-container" class="relative overflow-hidden border-b border-zinc-800 bg-[#0f0f0f] flex">
     <!-- Limitless Branding -->
     <a href="https://limitless.exchange" target="_blank" id="ticker-branding" class="flex items-center gap-2 px-4 border-r border-zinc-700 bg-[#0f0f0f] z-20 shrink-0 hover:bg-zinc-800 transition-colors" style="text-decoration:none;">
-      <img src="https://limitless.exchange/assets/images/logo.svg" alt="Limitless" width="20" height="20">
+      <img id="ticker-logo" src="https://limitless.exchange/assets/images/logo.svg" alt="Limitless" width="20" height="20" style="border-radius: 4px;">
       <span class="font-semibold text-white text-sm">Limitless</span>
     </a>
 
@@ -141,6 +141,9 @@
       branding.classList.add('bg-white', 'border-zinc-300', 'hover:bg-zinc-100');
       branding.querySelector('span').classList.remove('text-white');
       branding.querySelector('span').classList.add('text-black');
+
+      // Make logo black for light theme
+      document.getElementById('ticker-logo').style.filter = 'brightness(0)';
     }
 
     // Adjust speed for mobile

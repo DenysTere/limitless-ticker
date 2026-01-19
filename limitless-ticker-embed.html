@@ -68,6 +68,10 @@
       background: rgba(0, 0, 0, 0.05);
     }
 
+    body.light .ticker-logo {
+      filter: brightness(0);
+    }
+
     .ticker-branding span {
       font-weight: 600;
       font-size: 14px;
@@ -279,7 +283,7 @@
   <div class="ticker-wrapper">
     <!-- Limitless Branding -->
     <a href="https://limitless.exchange" target="_blank" class="ticker-branding">
-      <img src="https://limitless.exchange/assets/images/logo.svg" alt="Limitless" width="20" height="20">
+      <img class="ticker-logo" src="https://limitless.exchange/assets/images/logo.svg" alt="Limitless" width="20" height="20" style="border-radius: 4px;">
       <span>Limitless</span>
     </a>
 

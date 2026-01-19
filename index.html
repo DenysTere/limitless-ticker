@@ -60,7 +60,7 @@
 
         <!-- Limitless Branding -->
         <a href="https://limitless.exchange" target="_blank" id="ticker-branding" class="flex items-center gap-2 px-4 border-r border-zinc-700 bg-[#0f0f0f] z-20 shrink-0 hover:bg-zinc-800 transition-colors" style="text-decoration:none;">
-          <img src="https://limitless.exchange/assets/images/logo.svg" alt="Limitless" width="20" height="20">
+          <img id="ticker-logo" src="https://limitless.exchange/assets/images/logo.svg" alt="Limitless" width="20" height="20" style="border-radius: 4px;">
           <span class="font-semibold text-white text-sm">Limitless</span>
         </a>
 
@@ -584,6 +584,14 @@
       } else {
         leftGrad.style.background = 'linear-gradient(to right, #0f0f0f, transparent)';
         rightGrad.style.background = 'linear-gradient(to left, #0f0f0f, transparent)';
+      }
+
+      // Update logo for theme
+      const logo = document.getElementById('ticker-logo');
+      if (isLight) {
+        logo.style.filter = 'brightness(0)'; // Make logo black for light mode
+      } else {
+        logo.style.filter = 'none'; // Original logo for dark mode
       }
 
       // Update theme buttons
