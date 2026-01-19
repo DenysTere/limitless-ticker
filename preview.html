@@ -38,9 +38,8 @@
   <!-- Ticker at top -->
   <div id="ticker-container" class="relative overflow-hidden border-b border-zinc-800 bg-[#0f0f0f] flex">
     <!-- Limitless Branding -->
-    <a href="https://limitless.exchange" target="_blank" id="ticker-branding" class="flex items-center gap-2 px-4 border-r border-zinc-700 bg-[#0f0f0f] z-20 shrink-0 hover:bg-zinc-800 transition-colors" style="text-decoration:none;">
-      <img id="ticker-logo" src="https://limitless.exchange/assets/images/logo.svg" alt="Limitless" width="20" height="20" style="border-radius: 4px;">
-      <span class="font-semibold text-white text-sm">Limitless</span>
+    <a href="https://limitless.exchange" target="_blank" id="ticker-branding" class="flex items-center px-3 border-r border-zinc-700 bg-[#0f0f0f] z-20 shrink-0 hover:bg-zinc-800 transition-colors" style="text-decoration:none;">
+      <img id="ticker-logo" src="logo-white.png" alt="Limitless" style="height: 60%; width: auto;">
     </a>
 
     <!-- Ticker Content Area -->
@@ -139,8 +138,6 @@
       const branding = document.getElementById('ticker-branding');
       branding.classList.remove('bg-[#0f0f0f]', 'border-zinc-700', 'hover:bg-zinc-800');
       branding.classList.add('bg-white', 'border-zinc-300', 'hover:bg-zinc-100');
-      branding.querySelector('span').classList.remove('text-white');
-      branding.querySelector('span').classList.add('text-black');
 
       // Use black logo for light theme
       document.getElementById('ticker-logo').src = 'logo-black.png';
@@ -214,21 +211,13 @@
       // Update container height
       container.style.height = height + 'px';
 
-      // Scale branding
+      // Scale branding - logo scales with container height
       const branding = document.getElementById('ticker-branding');
-      const brandingLogo = branding.querySelector('img');
-      const brandingText = branding.querySelector('span');
-      const logoSize = Math.max(12, Math.round(20 * scale));
-      brandingLogo.style.width = logoSize + 'px';
-      brandingLogo.style.height = logoSize + 'px';
-      brandingText.style.fontSize = Math.max(10, Math.round(14 * scale)) + 'px';
-      branding.style.padding = `0 ${Math.max(8, Math.round(16 * scale))}px`;
-      branding.style.gap = Math.max(4, Math.round(8 * scale)) + 'px';
-      if (isCompact) {
-        brandingText.style.display = 'none';
-      } else {
-        brandingText.style.display = '';
-      }
+      const brandingLogo = document.getElementById('ticker-logo');
+      const logoHeight = Math.max(16, Math.round(height * 0.6));
+      brandingLogo.style.height = logoHeight + 'px';
+      brandingLogo.style.width = 'auto';
+      branding.style.padding = `0 ${Math.max(6, Math.round(12 * scale))}px`;
 
       const items = markets.slice(0, 12).map((m, index) => {
         const title = m.title || 'Market';
