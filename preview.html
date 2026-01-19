@@ -32,22 +32,33 @@
 <body class="bg-[#0A0A0A] min-h-screen">
 
   <!-- Ticker at top -->
-  <div id="ticker-container" class="relative overflow-hidden border-b border-zinc-800 bg-[#0f0f0f]">
-    <!-- Loading State -->
-    <div id="ticker-loading" class="flex items-center justify-center py-6 text-zinc-400">
-      <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+  <div id="ticker-container" class="relative overflow-hidden border-b border-zinc-800 bg-[#0f0f0f] flex">
+    <!-- Limitless Branding -->
+    <a href="https://limitless.exchange" target="_blank" id="ticker-branding" class="flex items-center gap-2 px-4 border-r border-zinc-700 bg-[#0f0f0f] z-20 shrink-0 hover:bg-zinc-800 transition-colors" style="text-decoration:none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
       </svg>
-      Loading live markets...
+      <span class="font-semibold text-white text-sm">Limitless</span>
+    </a>
+
+    <!-- Ticker Content Area -->
+    <div class="relative flex-1 overflow-hidden">
+      <!-- Loading State -->
+      <div id="ticker-loading" class="flex items-center justify-center py-6 text-zinc-400">
+        <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        Loading live markets...
+      </div>
+
+      <!-- Ticker Track -->
+      <div class="ticker-track hidden flex items-center py-4" id="ticker-track"></div>
+
+      <!-- Gradient overlays -->
+      <div id="fade-left" class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0f0f0f] to-transparent pointer-events-none"></div>
+      <div id="fade-right" class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0f0f0f] to-transparent pointer-events-none"></div>
     </div>
-
-    <!-- Ticker Track -->
-    <div class="ticker-track hidden flex items-center py-4" id="ticker-track"></div>
-
-    <!-- Gradient overlays -->
-    <div id="fade-left" class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0f0f0f] to-transparent pointer-events-none"></div>
-    <div id="fade-right" class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0f0f0f] to-transparent pointer-events-none"></div>
   </div>
 
   <!-- Info text -->
@@ -121,6 +132,15 @@
       document.getElementById('ticker-container').classList.add('bg-white', 'border-zinc-300');
       document.getElementById('fade-left').style.background = 'linear-gradient(to right, white, transparent)';
       document.getElementById('fade-right').style.background = 'linear-gradient(to left, white, transparent)';
+
+      // Update branding for light theme
+      const branding = document.getElementById('ticker-branding');
+      branding.classList.remove('bg-[#0f0f0f]', 'border-zinc-700', 'hover:bg-zinc-800');
+      branding.classList.add('bg-white', 'border-zinc-300', 'hover:bg-zinc-100');
+      branding.querySelector('svg').classList.remove('text-white');
+      branding.querySelector('svg').classList.add('text-black');
+      branding.querySelector('span').classList.remove('text-white');
+      branding.querySelector('span').classList.add('text-black');
     }
 
     // Adjust speed for mobile

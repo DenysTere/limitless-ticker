@@ -52,10 +52,20 @@
     <!-- Live Ticker Preview -->
     <div class="mb-16">
       <h2 class="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-4">Live Preview</h2>
-      <div id="ticker-container" class="relative overflow-hidden rounded-xl border border-zinc-800 bg-[#0f0f0f]">
+      <div id="ticker-container" class="relative overflow-hidden rounded-xl border border-zinc-800 bg-[#0f0f0f] flex">
 
-        <!-- Loading State -->
-        <div id="ticker-loading" class="flex items-center justify-center py-6 text-zinc-400">
+        <!-- Limitless Branding -->
+        <a href="https://limitless.exchange" target="_blank" id="ticker-branding" class="flex items-center gap-2 px-4 border-r border-zinc-700 bg-[#0f0f0f] z-20 shrink-0 hover:bg-zinc-800 transition-colors" style="text-decoration:none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          <span class="font-semibold text-white text-sm">Limitless</span>
+        </a>
+
+        <!-- Ticker Content Area -->
+        <div class="relative flex-1 overflow-hidden">
+          <!-- Loading State -->
+          <div id="ticker-loading" class="flex items-center justify-center py-6 text-zinc-400">
           <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -66,9 +76,10 @@
         <!-- Ticker Track (populated by JS) -->
         <div class="ticker-track hidden flex items-center py-4" id="ticker-track" style="--duration: 25s;"></div>
 
-        <!-- Gradient overlays -->
-        <div class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0f0f0f] to-transparent pointer-events-none"></div>
-        <div class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0f0f0f] to-transparent pointer-events-none"></div>
+          <!-- Gradient overlays -->
+          <div class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0f0f0f] to-transparent pointer-events-none"></div>
+          <div class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0f0f0f] to-transparent pointer-events-none"></div>
+        </div>
       </div>
       <p class="text-xs text-zinc-500 mt-2 text-center">Hover to pause • Click market to trade on limitless.exchange</p>
     </div>
@@ -470,6 +481,19 @@
       tickerContainer.classList.toggle('bg-white', isLight);
       tickerContainer.classList.toggle('border-zinc-800', !isLight);
       tickerContainer.classList.toggle('border-zinc-300', isLight);
+
+      // Update branding
+      const branding = document.getElementById('ticker-branding');
+      branding.classList.toggle('bg-[#0f0f0f]', !isLight);
+      branding.classList.toggle('bg-white', isLight);
+      branding.classList.toggle('border-zinc-700', !isLight);
+      branding.classList.toggle('border-zinc-300', isLight);
+      branding.classList.toggle('hover:bg-zinc-800', !isLight);
+      branding.classList.toggle('hover:bg-zinc-100', isLight);
+      branding.querySelector('svg').classList.toggle('text-white', !isLight);
+      branding.querySelector('svg').classList.toggle('text-black', isLight);
+      branding.querySelector('span').classList.toggle('text-white', !isLight);
+      branding.querySelector('span').classList.toggle('text-black', isLight);
 
       // Update gradient overlays
       const leftGrad = tickerContainer.querySelector('.absolute.left-0');

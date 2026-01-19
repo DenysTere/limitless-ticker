@@ -44,6 +44,44 @@
       overflow: hidden;
       background: var(--bg-color);
       height: 72px;
+      display: flex;
+    }
+
+    .ticker-branding {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      border-right: 1px solid var(--border-color);
+      background: var(--bg-color);
+      z-index: 20;
+      flex-shrink: 0;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .ticker-branding:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    body.light .ticker-branding:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .ticker-branding svg {
+      color: var(--text-primary);
+    }
+
+    .ticker-branding span {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .ticker-content-area {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
     }
 
     body.transparent .ticker-wrapper {
@@ -204,34 +242,6 @@
       display: none;
     }
 
-    /* Limitless branding */
-    .branding {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      background: var(--bg-color);
-      border-radius: 4px;
-      font-size: 10px;
-      color: var(--text-secondary);
-      z-index: 20;
-      opacity: 0.7;
-      text-decoration: none;
-    }
-
-    .branding:hover {
-      opacity: 1;
-    }
-
-    body.transparent .branding {
-      background: rgba(0, 0, 0, 0.6);
-      color: #fff;
-    }
-
     /* Error state */
     .error {
       display: flex;
@@ -245,22 +255,26 @@
 </head>
 <body>
   <div class="ticker-wrapper">
-    <div class="fade-left"></div>
-    <div class="fade-right"></div>
-
-    <div class="ticker-track" id="ticker-track">
-      <div class="loading">
-        <div class="loading-spinner"></div>
-        Loading markets...
-      </div>
-    </div>
-
-    <a href="https://limitless.exchange" target="_blank" class="branding">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <!-- Limitless Branding -->
+    <a href="https://limitless.exchange" target="_blank" class="ticker-branding">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
       </svg>
-      limitless.exchange
+      <span>Limitless</span>
     </a>
+
+    <!-- Ticker Content Area -->
+    <div class="ticker-content-area">
+      <div class="fade-left"></div>
+      <div class="fade-right"></div>
+
+      <div class="ticker-track" id="ticker-track">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          Loading markets...
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
