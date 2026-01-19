@@ -331,8 +331,23 @@
 
     const track = document.getElementById('ticker-track');
     const wrapper = document.querySelector('.ticker-wrapper');
-    track.style.setProperty('--duration', speed + 's');
     wrapper.style.height = height + 'px';
+
+    // Adjust speed for mobile (narrower screens need faster animation)
+    function getAdjustedSpeed(baseSpeed) {
+      const width = window.innerWidth;
+      if (width < 640) return Math.max(8, baseSpeed * 0.4); // Mobile: 40% of base speed
+      if (width < 1024) return Math.max(12, baseSpeed * 0.6); // Tablet: 60% of base speed
+      return baseSpeed;
+    }
+
+    function applySpeed() {
+      const adjustedSpeed = getAdjustedSpeed(speed);
+      track.style.setProperty('--duration', adjustedSpeed + 's');
+    }
+
+    applySpeed();
+    window.addEventListener('resize', applySpeed);
 
     // Apply scaled CSS variables
     document.documentElement.style.setProperty('--scale', scale);

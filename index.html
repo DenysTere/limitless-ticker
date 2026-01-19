@@ -385,11 +385,31 @@
     const speedValue = document.getElementById('speed-value');
     const tickerTrack = document.getElementById('ticker-track');
 
+    // Adjust speed for mobile (narrower screens need faster animation)
+    function getAdjustedSpeed(baseSpeed) {
+      const width = window.innerWidth;
+      if (width < 640) return Math.max(8, baseSpeed * 0.4); // Mobile: 40% of base speed
+      if (width < 1024) return Math.max(12, baseSpeed * 0.6); // Tablet: 60% of base speed
+      return baseSpeed; // Desktop: full speed
+    }
+
+    function applySpeed() {
+      const baseSpeed = parseInt(speedSlider.value);
+      const adjustedSpeed = getAdjustedSpeed(baseSpeed);
+      tickerTrack.style.setProperty('--duration', adjustedSpeed + 's');
+    }
+
     speedSlider.addEventListener('input', (e) => {
       speedValue.textContent = e.target.value + 's';
-      tickerTrack.style.setProperty('--duration', e.target.value + 's');
+      applySpeed();
       updateEmbedCode();
     });
+
+    // Re-apply speed on resize
+    window.addEventListener('resize', applySpeed);
+
+    // Initial speed application
+    applySpeed();
 
     // Height slider
     const heightSlider = document.getElementById('height-slider');

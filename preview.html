@@ -123,8 +123,21 @@
       document.getElementById('fade-right').style.background = 'linear-gradient(to left, white, transparent)';
     }
 
-    // Apply speed
-    document.getElementById('ticker-track').style.setProperty('--duration', speed + 's');
+    // Adjust speed for mobile
+    function getAdjustedSpeed(baseSpeed) {
+      const width = window.innerWidth;
+      if (width < 640) return Math.max(8, baseSpeed * 0.4);
+      if (width < 1024) return Math.max(12, baseSpeed * 0.6);
+      return baseSpeed;
+    }
+
+    function applySpeed() {
+      const adjustedSpeed = getAdjustedSpeed(speed);
+      document.getElementById('ticker-track').style.setProperty('--duration', adjustedSpeed + 's');
+    }
+
+    applySpeed();
+    window.addEventListener('resize', applySpeed);
 
     // Get emoji for market (same as main page)
     function getEmoji(title) {
