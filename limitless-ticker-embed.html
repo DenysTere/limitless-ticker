@@ -118,10 +118,15 @@
       align-items: center;
       height: 100%;
       animation: scroll var(--duration, 30s) linear infinite;
+      transition: opacity 0.5s ease;
     }
 
     .ticker-track:hover {
       animation-play-state: paused;
+    }
+
+    .ticker-track.fade-out {
+      opacity: 0;
     }
 
     .ticker-content {
@@ -428,8 +433,9 @@
       return Math.round(pct) + '%';
     }
 
-    // Track if we've loaded once - skip all refreshes to prevent jumping
+    // Track if we've loaded once
     let hasLoadedOnce = false;
+    let cachedMarkets = [];
 
     // Render markets
     function renderMarkets(markets) {
@@ -479,20 +485,15 @@
 
     // Fetch markets from Limitless API
     async function fetchMarkets() {
-      // Skip refresh to prevent jumping - only load once
-      if (hasLoadedOnce) return;
-
       try {
         let markets = [];
 
         if (category === 'all') {
-          // Use active endpoint for "All"
           const response = await fetch(`/api/markets/active?limit=${limit}&sortBy=${sortBy}`);
           if (!response.ok) throw new Error(`API error: ${response.status}`);
           const data = await response.json();
           markets = data.data || data.markets || (Array.isArray(data) ? data : []);
         } else {
-          // Use search endpoint for specific categories
           const config = categoryConfig[category];
           if (config && config.searchTerms.length > 0) {
             const searchPromises = config.searchTerms.map(term =>
@@ -500,33 +501,76 @@
                 .then(r => r.ok ? r.json() : { markets: [] })
                 .catch(() => ({ markets: [] }))
             );
-
             const results = await Promise.all(searchPromises);
             const allSearched = results.flatMap(r => r.markets || []);
-
-            // Remove duplicates by ID
             const seen = new Set();
             markets = allSearched.filter(m => {
               if (seen.has(m.id)) return false;
               seen.add(m.id);
               return true;
             });
-
-            // Filter by category names
             markets = filterByCategory(markets, category);
           }
         }
 
         if (markets.length === 0) {
+          cachedMarkets = sampleMarkets;
           renderMarkets(sampleMarkets);
         } else {
+          cachedMarkets = markets;
           renderMarkets(markets);
         }
         hasLoadedOnce = true;
       } catch (error) {
         console.error('Failed to fetch markets:', error);
+        cachedMarkets = sampleMarkets;
         renderMarkets(sampleMarkets);
         hasLoadedOnce = true;
+      }
+    }
+
+    // Seamless refresh with fade
+    async function seamlessRefresh() {
+      if (!hasLoadedOnce) return;
+
+      try {
+        let markets = [];
+        if (category === 'all') {
+          const response = await fetch(`/api/markets/active?limit=${limit}&sortBy=${sortBy}`);
+          if (!response.ok) return;
+          const data = await response.json();
+          markets = data.data || data.markets || (Array.isArray(data) ? data : []);
+        } else {
+          const config = categoryConfig[category];
+          if (config && config.searchTerms.length > 0) {
+            const searchPromises = config.searchTerms.map(term =>
+              fetch(`/api/markets/search?query=${encodeURIComponent(term)}&limit=15`)
+                .then(r => r.ok ? r.json() : { markets: [] })
+                .catch(() => ({ markets: [] }))
+            );
+            const results = await Promise.all(searchPromises);
+            const allSearched = results.flatMap(r => r.markets || []);
+            const seen = new Set();
+            markets = allSearched.filter(m => {
+              if (seen.has(m.id)) return false;
+              seen.add(m.id);
+              return true;
+            });
+            markets = filterByCategory(markets, category);
+          }
+        }
+
+        if (markets.length > 0) {
+          // Fade out
+          track.classList.add('fade-out');
+          setTimeout(() => {
+            cachedMarkets = markets;
+            renderMarkets(markets);
+            track.classList.remove('fade-out');
+          }, 500);
+        }
+      } catch (err) {
+        console.error('Seamless refresh error:', err);
       }
     }
 
@@ -546,6 +590,9 @@
 
     // Initial fetch
     fetchMarkets();
+
+    // Seamless refresh every 60 seconds
+    setInterval(seamlessRefresh, 60000);
   </script>
 </body>
 </html>

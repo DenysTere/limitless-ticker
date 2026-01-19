@@ -15,9 +15,13 @@
     }
     .ticker-track {
       animation: scroll var(--duration, 30s) linear infinite;
+      transition: opacity 0.5s ease;
     }
     .ticker-track:hover {
       animation-play-state: paused;
+    }
+    .ticker-track.fade-out {
+      opacity: 0;
     }
     .glow-green { text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
     .glow-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
@@ -324,13 +328,56 @@
     let marketsCache = {};
     let hasLoadedOnce = false;
 
+    // Seamless refresh - fade out, update, fade in
+    async function seamlessRefresh() {
+      if (!hasLoadedOnce) return;
+
+      try {
+        let markets = [];
+        if (currentCategory === 'all') {
+          const res = await fetch(`${API_BASE}/markets/active?limit=25`);
+          if (!res.ok) return;
+          const data = await res.json();
+          markets = data.data || data.markets || data;
+        } else {
+          const config = categoryConfig[currentCategory];
+          if (config && config.searchTerms.length > 0) {
+            const searchPromises = config.searchTerms.map(term =>
+              fetch(`${API_BASE}/markets/search?query=${encodeURIComponent(term)}&limit=15`)
+                .then(r => r.ok ? r.json() : { markets: [] })
+                .catch(() => ({ markets: [] }))
+            );
+            const results = await Promise.all(searchPromises);
+            const allSearched = results.flatMap(r => r.markets || []);
+            const seen = new Set();
+            markets = allSearched.filter(m => {
+              if (seen.has(m.id)) return false;
+              seen.add(m.id);
+              return true;
+            });
+            markets = filterByCategory(markets, currentCategory);
+          }
+        }
+
+        if (markets.length > 0) {
+          const track = document.getElementById('ticker-track');
+          // Fade out
+          track.classList.add('fade-out');
+
+          // Wait for fade out, then update and fade in
+          setTimeout(() => {
+            marketsCache[currentCategory] = markets;
+            renderTicker(markets, true);
+            track.classList.remove('fade-out');
+          }, 500);
+        }
+      } catch (err) {
+        console.error('Seamless refresh error:', err);
+      }
+    }
+
     // Fetch markets from API
     async function fetchMarkets(forceUpdate = false) {
-      // Skip refresh updates entirely to prevent jumping - only fetch on initial load or category change
-      if (hasLoadedOnce && !forceUpdate) {
-        return;
-      }
-
       try {
         // Show loading on initial load or category change
         if (!hasLoadedOnce || forceUpdate) {
@@ -447,7 +494,10 @@
     heightSlider.addEventListener('input', (e) => {
       currentHeight = parseInt(e.target.value);
       heightValue.textContent = currentHeight + 'px';
-      fetchMarkets(); // Re-render with new size
+      // Re-render with cached markets if available
+      if (marketsCache[currentCategory] && marketsCache[currentCategory].length > 0) {
+        renderTicker(marketsCache[currentCategory], true);
+      }
       updateEmbedCode();
     });
 
@@ -570,6 +620,9 @@
 
     // Load markets on page load
     fetchMarkets();
+
+    // Seamless refresh every 60 seconds
+    setInterval(seamlessRefresh, 60000);
   </script>
 </body>
 </html>
