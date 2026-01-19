@@ -313,21 +313,25 @@
 
     // Store markets cache per category
     let marketsCache = {};
+    let isInitialLoad = true;
 
     // Fetch markets from API
-    async function fetchMarkets() {
+    async function fetchMarkets(showLoading = false) {
       try {
-        document.getElementById('ticker-loading').classList.remove('hidden');
-        document.getElementById('ticker-track').classList.add('hidden');
-        document.getElementById('ticker-loading').innerHTML = `
-          <div class="flex items-center">
-            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-            </svg>
-            Loading markets...
-          </div>
-        `;
+        // Only show loading on initial load or category change
+        if (showLoading || isInitialLoad) {
+          document.getElementById('ticker-loading').classList.remove('hidden');
+          document.getElementById('ticker-track').classList.add('hidden');
+          document.getElementById('ticker-loading').innerHTML = `
+            <div class="flex items-center">
+              <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              Loading markets...
+            </div>
+          `;
+        }
 
         let markets = [];
 
@@ -368,7 +372,8 @@
 
         if (markets.length > 0) {
           marketsCache[currentCategory] = markets;
-          renderTicker(markets, true);
+          renderTicker(markets, isInitialLoad);
+          isInitialLoad = false;
         } else {
           document.getElementById('ticker-loading').innerHTML = `
             <span class="text-zinc-400">No markets found for this category</span>
@@ -384,8 +389,9 @@
 
     // Re-render with current category
     function applyCategory() {
-      // Always re-fetch when changing category
-      fetchMarkets();
+      // Show loading and re-fetch when changing category
+      lastRenderedContent = ''; // Reset to force update
+      fetchMarkets(true);
     }
 
     // Speed slider

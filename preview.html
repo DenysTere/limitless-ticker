@@ -169,6 +169,7 @@
 
     // Track last rendered content
     let lastRenderedContent = '';
+    let isInitialLoad = true;
 
     // Render markets (same logic as main page)
     function renderTicker(markets) {
@@ -226,9 +227,10 @@
         <div class="flex items-center shrink-0">${items}</div>
       `;
 
-      if (newContent !== lastRenderedContent) {
+      if (isInitialLoad || newContent !== lastRenderedContent) {
         lastRenderedContent = newContent;
         track.innerHTML = newContent;
+        isInitialLoad = false;
       }
 
       loading.classList.add('hidden');

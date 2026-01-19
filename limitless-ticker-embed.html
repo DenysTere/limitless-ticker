@@ -421,6 +421,7 @@
 
     // Track last rendered content to avoid jumps
     let lastRenderedContent = '';
+    let isInitialLoad = true;
 
     // Render markets
     function renderMarkets(markets) {
@@ -468,9 +469,11 @@
         <div class="ticker-content">${content}</div>
       `;
 
-      if (newContent !== lastRenderedContent) {
+      // Only update if initial load or content actually changed
+      if (isInitialLoad || newContent !== lastRenderedContent) {
         lastRenderedContent = newContent;
         track.innerHTML = newContent;
+        isInitialLoad = false;
       }
     }
 
