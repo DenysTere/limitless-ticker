@@ -419,6 +419,9 @@
       return Math.round(pct) + '%';
     }
 
+    // Track last rendered content to avoid jumps
+    let lastRenderedContent = '';
+
     // Render markets
     function renderMarkets(markets) {
       if (!markets || markets.length === 0) {
@@ -459,11 +462,16 @@
 
       const content = markets.slice(0, limit).map(createMarketItem).join('');
 
-      // Duplicate for seamless loop
-      track.innerHTML = `
+      // Check if content changed to avoid animation jump
+      const newContent = `
         <div class="ticker-content">${content}</div>
         <div class="ticker-content">${content}</div>
       `;
+
+      if (newContent !== lastRenderedContent) {
+        lastRenderedContent = newContent;
+        track.innerHTML = newContent;
+      }
     }
 
     // Fetch markets from Limitless API

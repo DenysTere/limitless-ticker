@@ -242,8 +242,11 @@
       });
     }
 
+    // Track last rendered content to avoid unnecessary updates
+    let lastRenderedContent = '';
+
     // Render markets to ticker
-    function renderTicker(markets) {
+    function renderTicker(markets, forceUpdate = false) {
       const track = document.getElementById('ticker-track');
       const loading = document.getElementById('ticker-loading');
       const isLight = currentTheme === 'light';
@@ -292,11 +295,16 @@
         `;
       }).join('');
 
-      // Duplicate for seamless loop
-      track.innerHTML = `
+      // Check if content has changed to avoid animation jump
+      const newContent = `
         <div class="flex items-center shrink-0">${items}</div>
         <div class="flex items-center shrink-0">${items}</div>
       `;
+
+      if (newContent !== lastRenderedContent || forceUpdate) {
+        lastRenderedContent = newContent;
+        track.innerHTML = newContent;
+      }
 
       // Show ticker, hide loading
       loading.classList.add('hidden');
@@ -360,7 +368,7 @@
 
         if (markets.length > 0) {
           marketsCache[currentCategory] = markets;
-          renderTicker(markets);
+          renderTicker(markets, true);
         } else {
           document.getElementById('ticker-loading').innerHTML = `
             <span class="text-zinc-400">No markets found for this category</span>

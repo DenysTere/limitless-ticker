@@ -167,6 +167,9 @@
       return x - Math.floor(x);
     }
 
+    // Track last rendered content
+    let lastRenderedContent = '';
+
     // Render markets (same logic as main page)
     function renderTicker(markets) {
       const track = document.getElementById('ticker-track');
@@ -217,11 +220,16 @@
         `;
       }).join('');
 
-      // Duplicate for seamless loop
-      track.innerHTML = `
+      // Check if content changed to avoid animation jump
+      const newContent = `
         <div class="flex items-center shrink-0">${items}</div>
         <div class="flex items-center shrink-0">${items}</div>
       `;
+
+      if (newContent !== lastRenderedContent) {
+        lastRenderedContent = newContent;
+        track.innerHTML = newContent;
+      }
 
       loading.classList.add('hidden');
       track.classList.remove('hidden');
