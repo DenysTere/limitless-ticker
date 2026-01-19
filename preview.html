@@ -35,9 +35,7 @@
   <div id="ticker-container" class="relative overflow-hidden border-b border-zinc-800 bg-[#0f0f0f] flex">
     <!-- Limitless Branding -->
     <a href="https://limitless.exchange" target="_blank" id="ticker-branding" class="flex items-center gap-2 px-4 border-r border-zinc-700 bg-[#0f0f0f] z-20 shrink-0 hover:bg-zinc-800 transition-colors" style="text-decoration:none;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-      </svg>
+      <img src="https://limitless.exchange/assets/images/logo.svg" alt="Limitless" width="20" height="20">
       <span class="font-semibold text-white text-sm">Limitless</span>
     </a>
 
@@ -137,8 +135,6 @@
       const branding = document.getElementById('ticker-branding');
       branding.classList.remove('bg-[#0f0f0f]', 'border-zinc-700', 'hover:bg-zinc-800');
       branding.classList.add('bg-white', 'border-zinc-300', 'hover:bg-zinc-100');
-      branding.querySelector('svg').classList.remove('text-white');
-      branding.querySelector('svg').classList.add('text-black');
       branding.querySelector('span').classList.remove('text-white');
       branding.querySelector('span').classList.add('text-black');
     }
