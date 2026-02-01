@@ -171,6 +171,101 @@
       </div>
     </div>
 
+    <!-- Single Market Widget Section -->
+    <div class="mb-12 md:mb-16 pt-8 border-t border-zinc-800">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold mb-3">Single Market Widget</h2>
+        <p class="text-zinc-400">Embed a specific prediction market card on your website</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+        <!-- Left: Select Market -->
+        <div>
+          <h3 class="text-lg md:text-xl font-semibold mb-4 md:mb-6">Select Market</h3>
+          <div class="space-y-6">
+            <!-- Search Input -->
+            <div>
+              <label class="block text-sm font-medium text-zinc-400 mb-3">Search Markets</label>
+              <div class="relative">
+                <input type="text" id="market-search" placeholder="Search for a market..." class="w-full py-3 px-4 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500 min-h-[48px]">
+                <div id="search-results" class="absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden z-50 hidden max-h-64 overflow-y-auto"></div>
+              </div>
+            </div>
+
+            <!-- Or URL Input -->
+            <div>
+              <label class="block text-sm font-medium text-zinc-400 mb-3">Or Enter Market URL/Slug</label>
+              <input type="text" id="market-url" placeholder="e.g., btc-100k-2026 or full URL" class="w-full py-3 px-4 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500 min-h-[48px]">
+            </div>
+
+            <!-- Selected Market Display -->
+            <div id="selected-market-display" class="hidden">
+              <label class="block text-sm font-medium text-zinc-400 mb-3">Selected Market</label>
+              <div class="flex items-center gap-3 py-3 px-4 rounded-lg bg-zinc-900 border border-zinc-700">
+                <span id="selected-market-emoji" class="text-xl">📊</span>
+                <div class="flex-1 min-w-0">
+                  <div id="selected-market-title" class="text-white truncate">Market Title</div>
+                  <div id="selected-market-odds" class="text-sm text-zinc-400">50%</div>
+                </div>
+                <button id="clear-market" class="text-zinc-500 hover:text-white">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Theme -->
+            <div>
+              <label class="block text-sm font-medium text-zinc-400 mb-3">Theme</label>
+              <div class="flex gap-3">
+                <button id="single-theme-dark" class="flex-1 py-3 px-4 rounded-lg border-2 border-white bg-zinc-900 text-white font-medium min-h-[48px]">Dark</button>
+                <button id="single-theme-light" class="flex-1 py-3 px-4 rounded-lg border-2 border-zinc-700 bg-zinc-800 text-zinc-400 font-medium hover:border-zinc-600 min-h-[48px]">Light</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Preview + Embed Code -->
+        <div>
+          <!-- Preview -->
+          <h3 class="text-lg md:text-xl font-semibold mb-4 md:mb-6">Preview</h3>
+          <div class="mb-6">
+            <div id="single-market-container" class="rounded-2xl overflow-hidden border border-zinc-700" style="max-width: 400px; height: 240px;">
+              <!-- Placeholder -->
+              <div id="single-market-placeholder" class="flex items-center justify-center h-full bg-zinc-900 text-zinc-500">
+                <span>Select a market to see the preview</span>
+              </div>
+              <!-- Iframe (hidden initially) -->
+              <iframe id="single-market-preview" src="" class="hidden" style="width: 100%; height: 240px; border: none;"></iframe>
+            </div>
+          </div>
+
+          <!-- Embed Code -->
+          <div>
+            <h3 class="text-lg md:text-xl font-semibold mb-4">Embed Code</h3>
+            <div class="code-block text-green-400 mb-4">
+              <pre id="single-embed-code">Select a market to generate embed code</pre>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button id="single-copy-btn" class="flex-1 py-3 px-4 rounded-lg bg-white text-black font-semibold hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Copy
+              </button>
+              <button id="single-preview-btn" class="flex-1 py-3 px-4 rounded-lg bg-zinc-800 text-white font-semibold hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2 border border-zinc-700 min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                Open
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <div class="text-center py-8 border-t border-zinc-800">
       <a href="https://limitless.exchange" class="text-zinc-400 hover:text-white transition-colors">
@@ -665,6 +760,252 @@
 
     // Seamless refresh every 5 minutes
     setInterval(seamlessRefresh, 300000);
+
+    // ========================================
+    // Single Market Widget Functionality
+    // ========================================
+
+    let selectedMarket = null;
+    let singleMarketTheme = 'dark';
+    let searchTimeout = null;
+
+    const marketSearch = document.getElementById('market-search');
+    const searchResults = document.getElementById('search-results');
+    const marketUrlInput = document.getElementById('market-url');
+    const selectedMarketDisplay = document.getElementById('selected-market-display');
+    const singleMarketPreview = document.getElementById('single-market-preview');
+    const singleMarketContainer = document.getElementById('single-market-container');
+    const singleEmbedCode = document.getElementById('single-embed-code');
+    const singleCopyBtn = document.getElementById('single-copy-btn');
+    const singlePreviewBtn = document.getElementById('single-preview-btn');
+    const singleThemeDark = document.getElementById('single-theme-dark');
+    const singleThemeLight = document.getElementById('single-theme-light');
+
+    // Search for markets
+    async function searchMarkets(query) {
+      if (query.length < 2) {
+        searchResults.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/markets/search?query=${encodeURIComponent(query)}&limit=10`);
+        if (!response.ok) throw new Error('Search failed');
+        const data = await response.json();
+        const markets = data.markets || [];
+
+        if (markets.length === 0) {
+          searchResults.innerHTML = '<div class="px-4 py-3 text-zinc-500 text-sm">No markets found</div>';
+        } else {
+          searchResults.innerHTML = markets.map(m => {
+            const pct = formatPrice(m.prices?.[0] || 0.5);
+            const emoji = getEmoji(m.title || '');
+            return `
+              <div class="market-result px-4 py-3 hover:bg-zinc-700 cursor-pointer border-b border-zinc-700 last:border-b-0" data-market='${JSON.stringify(m).replace(/'/g, "&#39;")}'>
+                <div class="flex items-center gap-3">
+                  <span class="text-lg">${emoji}</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-white text-sm truncate">${m.title}</div>
+                    <div class="text-zinc-400 text-xs">${pct}% YES</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        searchResults.classList.remove('hidden');
+      } catch (err) {
+        console.error('Search error:', err);
+        searchResults.innerHTML = '<div class="px-4 py-3 text-red-400 text-sm">Search failed</div>';
+        searchResults.classList.remove('hidden');
+      }
+    }
+
+    // Handle search input
+    marketSearch.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => searchMarkets(e.target.value), 300);
+    });
+
+    // Handle search result click
+    searchResults.addEventListener('click', (e) => {
+      const resultEl = e.target.closest('.market-result');
+      if (resultEl) {
+        const market = JSON.parse(resultEl.dataset.market);
+        selectMarket(market);
+        searchResults.classList.add('hidden');
+        marketSearch.value = '';
+      }
+    });
+
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!marketSearch.contains(e.target) && !searchResults.contains(e.target)) {
+        searchResults.classList.add('hidden');
+      }
+    });
+
+    // Handle URL input
+    marketUrlInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const value = e.target.value.trim();
+        if (value) {
+          // Extract slug from URL or use as-is
+          let slug = value;
+          if (value.includes('limitless.exchange/markets/')) {
+            slug = value.split('limitless.exchange/markets/')[1].split('?')[0].split('#')[0];
+          }
+          fetchMarketBySlug(slug);
+        }
+      }, 500);
+    });
+
+    // Fetch market by slug
+    async function fetchMarketBySlug(slug) {
+      try {
+        // Try direct fetch
+        const response = await fetch(`${API_BASE}/markets/${slug}`);
+        if (response.ok) {
+          const market = await response.json();
+          selectMarket(market);
+          return;
+        }
+
+        // Try search
+        const searchResponse = await fetch(`${API_BASE}/markets/search?query=${encodeURIComponent(slug)}&limit=20`);
+        if (searchResponse.ok) {
+          const data = await searchResponse.json();
+          const markets = data.markets || [];
+          const market = markets.find(m => m.slug === slug || m.id === slug || m.address === slug);
+          if (market) {
+            selectMarket(market);
+            return;
+          }
+        }
+
+        // Try active markets
+        const activeResponse = await fetch(`${API_BASE}/markets/active?limit=50`);
+        if (activeResponse.ok) {
+          const data = await activeResponse.json();
+          const markets = data.data || data.markets || (Array.isArray(data) ? data : []);
+          const market = markets.find(m => m.slug === slug || m.id === slug || m.address === slug);
+          if (market) {
+            selectMarket(market);
+            return;
+          }
+        }
+
+        console.log('Market not found:', slug);
+      } catch (err) {
+        console.error('Fetch market error:', err);
+      }
+    }
+
+    // Select a market
+    function selectMarket(market) {
+      selectedMarket = market;
+      const pct = formatPrice(market.prices?.[0] || 0.5);
+      const emoji = getEmoji(market.title || '');
+
+      document.getElementById('selected-market-emoji').textContent = emoji;
+      document.getElementById('selected-market-title').textContent = market.title;
+      document.getElementById('selected-market-odds').textContent = `${pct}% YES`;
+      selectedMarketDisplay.classList.remove('hidden');
+
+      singleCopyBtn.disabled = false;
+      singlePreviewBtn.disabled = false;
+
+      updateSingleMarketWidget();
+    }
+
+    // Clear selected market
+    document.getElementById('clear-market').addEventListener('click', () => {
+      selectedMarket = null;
+      selectedMarketDisplay.classList.add('hidden');
+      marketUrlInput.value = '';
+      singleCopyBtn.disabled = true;
+      singlePreviewBtn.disabled = true;
+      singleEmbedCode.textContent = 'Select a market to generate embed code';
+      singleMarketPreview.src = '';
+      singleMarketPreview.classList.add('hidden');
+      singleMarketPlaceholder.classList.remove('hidden');
+    });
+
+    const singleMarketPlaceholder = document.getElementById('single-market-placeholder');
+
+    // Update single market widget preview and embed code
+    function updateSingleMarketWidget() {
+      if (!selectedMarket) return;
+
+      const slug = selectedMarket.slug || selectedMarket.address || '';
+      const baseUrl = window.location.origin;
+      const embedUrl = `${baseUrl}/limitless-market-embed.html?market=${slug}&theme=${singleMarketTheme}`;
+
+      // Hide placeholder, show preview
+      singleMarketPlaceholder.classList.add('hidden');
+      singleMarketPreview.classList.remove('hidden');
+
+      // Update preview
+      singleMarketPreview.src = embedUrl;
+
+      // Update embed code
+      singleEmbedCode.textContent = `<iframe
+  src="${embedUrl}"
+  width="400"
+  height="240"
+  frameborder="0"
+></iframe>`;
+    }
+
+    // Theme toggle
+    singleThemeDark.addEventListener('click', () => {
+      singleMarketTheme = 'dark';
+      singleThemeDark.classList.add('border-white', 'text-white');
+      singleThemeDark.classList.remove('border-zinc-700', 'text-zinc-400');
+      singleThemeLight.classList.remove('border-white', 'text-white');
+      singleThemeLight.classList.add('border-zinc-700', 'text-zinc-400');
+      updateSingleMarketWidget();
+    });
+
+    singleThemeLight.addEventListener('click', () => {
+      singleMarketTheme = 'light';
+      singleThemeLight.classList.add('border-white', 'text-white');
+      singleThemeLight.classList.remove('border-zinc-700', 'text-zinc-400');
+      singleThemeDark.classList.remove('border-white', 'text-white');
+      singleThemeDark.classList.add('border-zinc-700', 'text-zinc-400');
+      updateSingleMarketWidget();
+    });
+
+    // Copy button
+    singleCopyBtn.addEventListener('click', () => {
+      const code = singleEmbedCode.textContent;
+      navigator.clipboard.writeText(code);
+      singleCopyBtn.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        Copied!
+      `;
+      setTimeout(() => {
+        singleCopyBtn.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Copy
+        `;
+      }, 2000);
+    });
+
+    // Open preview button
+    singlePreviewBtn.addEventListener('click', () => {
+      if (selectedMarket) {
+        const slug = selectedMarket.slug || selectedMarket.address || '';
+        const previewUrl = `limitless-market-embed.html?market=${slug}&theme=${singleMarketTheme}`;
+        window.open(previewUrl, '_blank');
+      }
+    });
   </script>
 </body>
 </html>

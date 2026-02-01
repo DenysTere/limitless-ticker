@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limitless Market Widget</title>
+  <link rel="icon" href="https://limitless.exchange/assets/images/logo.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* Dark theme (default) */
+    :root {
+      --card-bg: #0f0f0f;
+      --text-primary: #ffffff;
+      --text-secondary: #a3a3a3;
+      --border-color: #262626;
+      --green: #22c55e;
+      --green-bg: rgba(34, 197, 94, 0.15);
+      --orange: #f97316;
+      --orange-bg: rgba(249, 115, 22, 0.15);
+    }
+
+    /* Light theme */
+    body.light {
+      --card-bg: #ffffff;
+      --text-primary: #0a0a0a;
+      --text-secondary: #525252;
+      --border-color: #e5e5e5;
+      --green-bg: rgba(34, 197, 94, 0.1);
+      --orange-bg: rgba(249, 115, 22, 0.1);
+    }
+
+    .widget-card {
+      width: 400px;
+      max-width: 100%;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Header - Icon and Title */
+    .widget-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .market-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    body.light .market-icon {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    }
+
+    .market-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .market-icon-emoji {
+      font-size: 20px;
+    }
+
+    .market-title {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Probability Bar */
+    .probability-section {
+      margin-bottom: 16px;
+    }
+
+    .probability-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--orange);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .probability-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .probability-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .probability-label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .probability-label.yes {
+      color: var(--green);
+    }
+
+    .probability-label.no {
+      color: var(--orange);
+    }
+
+    /* Outcome Buttons */
+    .outcome-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .outcome-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      text-decoration: none;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .outcome-btn.yes {
+      background: var(--green);
+      color: white;
+    }
+
+    .outcome-btn.yes:hover {
+      background: #16a34a;
+    }
+
+    .outcome-btn.no {
+      background: var(--orange);
+      color: white;
+    }
+
+    .outcome-btn.no:hover {
+      background: #ea580c;
+    }
+
+    .outcome-btn .arrow {
+      font-size: 12px;
+    }
+
+    /* Footer - Branding and Volume */
+    .widget-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .branding {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .branding:hover {
+      color: var(--text-primary);
+    }
+
+    .branding-logo {
+      height: 22px;
+      width: auto;
+      opacity: 0.8;
+    }
+
+    .branding:hover .branding-logo {
+      opacity: 1;
+    }
+
+    .volume {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .volume-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Loading state */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      color: var(--text-secondary);
+      gap: 12px;
+    }
+
+    .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border-color);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Error state */
+    .error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      color: var(--text-secondary);
+      gap: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="widget-card" id="widget">
+    <!-- Loading State -->
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      <span>Loading market...</span>
+    </div>
+
+    <!-- Error State -->
+    <div class="error hidden" id="error">
+      <span id="error-message">Market not found</span>
+    </div>
+
+    <!-- Market Content -->
+    <div class="hidden" id="market-container">
+      <!-- Header -->
+      <div class="widget-header">
+        <div class="market-icon" id="market-icon">
+          <span class="market-icon-emoji" id="market-emoji">📊</span>
+        </div>
+        <h2 class="market-title" id="market-title">Loading...</h2>
+      </div>
+
+      <!-- Probability Bar -->
+      <div class="probability-section">
+        <div class="probability-bar">
+          <div class="probability-bar-fill" id="probability-bar" style="width: 50%;"></div>
+        </div>
+        <div class="probability-labels">
+          <span class="probability-label yes" id="yes-label">50%</span>
+          <span class="probability-label no" id="no-label">50%</span>
+        </div>
+      </div>
+
+      <!-- Outcome Buttons -->
+      <div class="outcome-buttons">
+        <a class="outcome-btn yes" id="yes-btn" href="#" target="_blank">
+          <span class="arrow">↑</span>
+          <span id="yes-btn-text">YES (50%)</span>
+        </a>
+        <a class="outcome-btn no" id="no-btn" href="#" target="_blank">
+          <span class="arrow">↓</span>
+          <span id="no-btn-text">NO (50%)</span>
+        </a>
+      </div>
+
+      <!-- Footer -->
+      <div class="widget-footer">
+        <a href="https://limitless.exchange" target="_blank" class="branding">
+          <img src="logo-white.png" alt="Limitless" class="branding-logo" id="branding-logo">
+        </a>
+        <div class="volume">
+          <svg class="volume-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+          <span id="volume">$0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Parse URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const theme = params.get('theme') || 'dark';
+    const marketSlug = params.get('market') || '';
+
+    // Apply theme
+    if (theme === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('branding-logo').src = 'logo-black.png';
+    }
+
+    // Elements
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const errorMessage = document.getElementById('error-message');
+    const marketContainer = document.getElementById('market-container');
+    const marketTitle = document.getElementById('market-title');
+    const marketIcon = document.getElementById('market-icon');
+    const marketEmoji = document.getElementById('market-emoji');
+    const probabilityBar = document.getElementById('probability-bar');
+    const yesLabel = document.getElementById('yes-label');
+    const noLabel = document.getElementById('no-label');
+    const yesBtn = document.getElementById('yes-btn');
+    const noBtn = document.getElementById('no-btn');
+    const yesBtnText = document.getElementById('yes-btn-text');
+    const noBtnText = document.getElementById('no-btn-text');
+    const volumeEl = document.getElementById('volume');
+
+    // Get emoji for market
+    function getEmoji(title) {
+      const t = title.toLowerCase();
+      if (t.includes('btc') || t.includes('bitcoin')) return '₿';
+      if (t.includes('eth') || t.includes('ethereum')) return 'Ξ';
+      if (t.includes('sol') || t.includes('solana')) return '◎';
+      if (t.includes('doge')) return '🐕';
+      if (t.includes('trump') || t.includes('biden') || t.includes('election') || t.includes('president')) return '🇺🇸';
+      if (t.includes('nfl') || t.includes('nba') || t.includes('super bowl') || t.includes('championship') || t.includes('football') || t.includes('soccer')) return '⚽';
+      if (t.includes('ufc') || t.includes('fight') || t.includes('boxing')) return '🥊';
+      if (t.includes('ai') || t.includes('gpt') || t.includes('openai')) return '🤖';
+      if (t.includes('fed') || t.includes('rate') || t.includes('inflation') || t.includes('gdp')) return '📈';
+      if (t.includes('spacex') || t.includes('nasa') || t.includes('mars') || t.includes('rocket')) return '🚀';
+      if (t.includes('apple') || t.includes('iphone')) return '🍎';
+      if (t.includes('tesla')) return '⚡';
+      if (t.includes('google')) return '🔍';
+      if (t.includes('above') || t.includes('below')) return '📊';
+      if (t.includes('champions') || t.includes('league') || t.includes('uefa')) return '🏆';
+      return '📊';
+    }
+
+    // Format probability
+    function formatProbability(price) {
+      const num = parseFloat(price);
+      const pct = num > 1 ? num : num * 100;
+      return Math.round(pct * 10) / 10; // One decimal place
+    }
+
+    // Format volume
+    function formatVolume(volume) {
+      if (!volume) return '$0';
+      const num = parseFloat(volume);
+      if (num >= 1000000) return '$' + (num / 1000000).toFixed(2) + 'M';
+      if (num >= 1000) return '$' + (num / 1000).toFixed(2) + 'K';
+      return '$' + num.toFixed(2);
+    }
+
+    // Render market
+    function renderMarket(market) {
+      const title = market.title || market.question || 'Unknown Market';
+      const slug = market.slug || market.address || '';
+      const url = `https://limitless.exchange/markets/${slug}`;
+      const yesProbability = formatProbability(market.prices?.[0] || 0.5);
+      const noProbability = Math.round((100 - yesProbability) * 10) / 10;
+      const imageUrl = market.imageUrl || market.image || '';
+      const volume = market.volumeFormatted || market.volume || 0;
+
+      // Get outcome names (default to YES/NO, but could be ABOVE/BELOW etc)
+      const outcomes = market.outcomes || ['YES', 'NO'];
+      const yesOutcome = outcomes[0] || 'YES';
+      const noOutcome = outcomes[1] || 'NO';
+
+      // Update title
+      marketTitle.textContent = title;
+
+      // Update icon
+      if (imageUrl) {
+        marketIcon.innerHTML = `<img src="${imageUrl}" alt="" onerror="this.parentElement.innerHTML='<span class=\\'market-icon-emoji\\'>${getEmoji(title)}</span>'">`;
+      } else {
+        marketEmoji.textContent = getEmoji(title);
+      }
+
+      // Update probability bar
+      probabilityBar.style.width = yesProbability + '%';
+
+      // Update labels
+      yesLabel.textContent = yesProbability + '%';
+      noLabel.textContent = noProbability + '%';
+
+      // Update buttons
+      yesBtnText.textContent = `${yesOutcome} (${yesProbability}%)`;
+      noBtnText.textContent = `${noOutcome} (${noProbability}%)`;
+      yesBtn.href = url;
+      noBtn.href = url;
+
+      // Update volume
+      volumeEl.textContent = formatVolume(volume);
+
+      // Show content
+      loading.classList.add('hidden');
+      error.classList.add('hidden');
+      marketContainer.classList.remove('hidden');
+    }
+
+    // Show error
+    function showError(message) {
+      loading.classList.add('hidden');
+      marketContainer.classList.add('hidden');
+      error.classList.remove('hidden');
+      errorMessage.textContent = message;
+    }
+
+    // Fetch market
+    async function fetchMarket() {
+      if (!marketSlug) {
+        showError('No market specified');
+        return;
+      }
+
+      try {
+        // Try direct fetch by slug
+        const response = await fetch(`/api/markets/${marketSlug}`);
+        if (response.ok) {
+          const market = await response.json();
+          renderMarket(market);
+          return;
+        }
+
+        // Try search
+        const searchResponse = await fetch(`/api/markets/search?query=${encodeURIComponent(marketSlug)}&limit=20`);
+        if (searchResponse.ok) {
+          const data = await searchResponse.json();
+          const markets = data.markets || [];
+          const market = markets.find(m =>
+            m.slug === marketSlug ||
+            m.id === marketSlug ||
+            m.address === marketSlug ||
+            m.slug?.includes(marketSlug)
+          );
+          if (market) {
+            renderMarket(market);
+            return;
+          }
+        }
+
+        // Try active markets
+        const activeResponse = await fetch('/api/markets/active?limit=100');
+        if (activeResponse.ok) {
+          const data = await activeResponse.json();
+          const markets = data.data || data.markets || (Array.isArray(data) ? data : []);
+          const market = markets.find(m =>
+            m.slug === marketSlug ||
+            m.id === marketSlug ||
+            m.address === marketSlug ||
+            m.slug?.includes(marketSlug)
+          );
+          if (market) {
+            renderMarket(market);
+            return;
+          }
+        }
+
+        showError('Market not found');
+      } catch (err) {
+        console.error('Failed to fetch market:', err);
+        showError('Failed to load market');
+      }
+    }
+
+    // Fetch on load
+    fetchMarket();
+
+    // Auto-refresh every 60 seconds for live data
+    setInterval(fetchMarket, 60000);
+  </script>
+</body>
+</html>
